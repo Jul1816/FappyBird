@@ -1,0 +1,68 @@
+"""Entry point chính của trò chơi Flappy Bird (Arcade 3.3.3)."""
+import sys
+from typing import Optional
+
+import arcade
+
+from .constants import SCREEN_HEIGHT, SCREEN_WIDTH
+from .models.save_data import SaveData
+from .services.audio import AudioService
+from .services.skin_manager import SkinManager
+from .services.storage import StorageService
+from .tools.generate_placeholders import ensure_assets_exist
+
+
+class FlappyWindow(arcade.Window):
+    def __init__(self) -> None:
+        # Tự động tạo asset placeholder nếu thiếu trước khi engine khởi chạy (DX-1)
+        ensure_assets_exist()
+
+        super().__init__(
+            width=SCREEN_WIDTH,
+            height=SCREEN_HEIGHT,
+            title="Flappy Bird Pixel Art",
+            resizable=True,
+            antialiasing=False,  # Pixel art không làm mờ viền
+        )
+
+        # Dịch vụ dữ liệu & âm thanh
+        self.storage = StorageService()
+        self.save_data: SaveData = self.storage.load()
+        self.audio = AudioService()
+        self.skin_manager = SkinManager()
+
+        # Cache texture của skin đang trang bị
+        self.current_skin_texture: Optional[arcade.Texture] = None
+        self.reload_skin_texture()
+
+        # Cờ Debug Mode (DX-2)
+        self.debug_hitbox: bool = False
+        self.god_mode: bool = False
+
+    def reload_skin_texture(self) -> None:
+        """Nạp lại texture của skin đang trang bị hiện tại."""
+        from .models.skin import DEFAULT_SKINS
+
+        equipped_id = self.save_data.equipped_skin
+        skin_obj = next((s for s in DEFAULT_SKINS if s.id == equipped_id), DEFAULT_SKINS[0])
+        try:
+            self.current_skin_texture = arcade.load_texture(skin_obj.sprite_path)
+        except Exception:
+            self.current_skin_texture = arcade.load_texture("assets/skins/classic.png")
+
+    def save_progress(self) -> None:
+        """Lưu trạng thái hiện tại vào save_data.json."""
+        self.storage.save(self.save_data)
+
+
+def main() -> None:
+    window = FlappyWindow()
+    from .views.start_view import StartView
+
+    start_view = StartView()
+    window.show_view(start_view)
+    arcade.run()
+
+
+if __name__ == "__main__":
+    main()

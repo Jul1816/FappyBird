@@ -1,0 +1,33 @@
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.tmp
+
+# Testing & quality caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local game runtime & save data
+data/
+
+# Developer tasks, specifications & test suites (minimal runtime repo)
+tests/
+tasks/
+SPEC.md
+
+# IDEs & OS files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+Thumbs.db
+desktop.ini
+.DS_Store

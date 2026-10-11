@@ -1,0 +1,197 @@
+"""StartView: Màn hình chào mừng, hiển thị kỷ lục, chim lắc lư SHM và nút vào Shop."""
+import math
+
+import arcade
+
+from ..constants import (
+    BIRD_START_X,
+    BIRD_START_Y,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+)
+from ..entities.bird import Bird
+from ..entities.floor import Floor
+from .base_view import BaseView
+
+
+class StartView(BaseView):
+    def __init__(self) -> None:
+        super().__init__()
+        self.background = arcade.Sprite("assets/sprites/background-day.png")
+        self.background.center_x = SCREEN_WIDTH / 2.0
+        self.background.center_y = SCREEN_HEIGHT / 2.0
+
+        self.floor = Floor()
+        self.bg_list = arcade.SpriteList()
+        self.bg_list.append(self.background)
+        self.bg_list.append(self.floor)
+
+        self.bird: Bird | None = None
+        self.bird_list = arcade.SpriteList()
+        self.time: float = 0.0
+
+        # Tọa độ nút Shop (để click chuột unproject)
+        self.shop_button_bounds = (
+            SCREEN_WIDTH / 2.0 - 55.0,  # left
+            SCREEN_WIDTH / 2.0 + 55.0,  # right
+            70.0,                        # bottom
+            105.0,                       # top
+        )
+        sb_bot, sb_top = self.shop_button_bounds[2], self.shop_button_bounds[3]
+
+        # Khởi tạo các đối tượng arcade.Text cố định
+        self.title_text = arcade.Text(
+            "FLAPPY BIRD",
+            SCREEN_WIDTH / 2.0,
+            SCREEN_HEIGHT - 120.0,
+            (255, 215, 0, 255),
+            font_size=24,
+            anchor_x="center",
+            anchor_y="center",
+            bold=True,
+        )
+        self.best_score_text = arcade.Text(
+            "BEST SCORE: 0",
+            SCREEN_WIDTH / 2.0,
+            SCREEN_HEIGHT - 155.0,
+            arcade.color.WHITE,
+            font_size=12,
+            anchor_x="center",
+            anchor_y="center",
+            bold=True,
+        )
+        self.prompt_text = arcade.Text(
+            "[ SPACE ] TO PLAY",
+            SCREEN_WIDTH / 2.0,
+            SCREEN_HEIGHT - 260.0,
+            arcade.color.WHITE,
+            font_size=13,
+            anchor_x="center",
+            anchor_y="center",
+            bold=True,
+        )
+        self.shop_btn_text = arcade.Text(
+            "[ S ] SHOP",
+            SCREEN_WIDTH / 2.0,
+            (sb_bot + sb_top) / 2.0,
+            arcade.color.WHITE,
+            font_size=11,
+            anchor_x="center",
+            anchor_y="center",
+            bold=True,
+        )
+        self.coins_text = arcade.Text(
+            "Coins: 0",
+            SCREEN_WIDTH - 12.0,
+            SCREEN_HEIGHT - 18.0,
+            (255, 215, 0, 255),
+            font_size=11,
+            anchor_x="right",
+            anchor_y="center",
+            bold=True,
+        )
+
+    def on_show_view(self) -> None:
+        super().on_show_view()
+        self.time = 0.0
+        self.floor.reset()
+
+        # Cập nhật nội dung text theo dữ liệu save_data hiện tại
+        best_score = self.flappy_window.save_data.high_score
+        self.best_score_text.text = f"BEST SCORE: {best_score}"
+        self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+
+        texture = self.flappy_window.current_skin_texture
+        self.bird = Bird(
+            texture=texture,
+            center_x=float(BIRD_START_X),
+            center_y=float(BIRD_START_Y),
+        )
+        self.bird_list.clear()
+        self.bird_list.append(self.bird)
+
+    def on_update(self, delta_time: float) -> None:
+        self.time += delta_time
+        # Cuộn sàn nhẹ
+        self.floor.update_scroll(delta_time, 80.0)
+
+        # Hiệu ứng nhấp nháy chữ Space
+        alpha = int(180 + 75 * math.sin(self.time * 6.0))
+        self.prompt_text.color = (255, 255, 255, alpha)
+
+        # Chim chuyển động điều hòa (SHM)
+
+        if self.bird:
+            self.bird.center_y = BIRD_START_Y + math.sin(self.time * 5.0) * 7.0
+            self.bird.angle = math.sin(self.time * 5.0) * 8.0
+
+    def on_key_press(self, symbol: int, modifiers: int) -> None:
+        super().on_key_press(symbol, modifiers)
+
+        if symbol in (arcade.key.SPACE, arcade.key.ENTER, arcade.key.UP):
+            self.start_game()
+        elif symbol in (arcade.key.S, arcade.key.TAB):
+            self.open_shop()
+
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            # Ánh xạ tọa độ chuột về thế giới ảo (Hardening P1)
+            vx, vy = self.unproject_mouse(x, y)
+            sb_left, sb_right, sb_bot, sb_top = self.shop_button_bounds
+
+            # Nếu click vào nút Shop
+            if sb_left <= vx <= sb_right and sb_bot <= vy <= sb_top:
+                self.open_shop()
+            else:
+                self.start_game()
+
+    def start_game(self) -> None:
+        from .game_view import GameView
+
+        game_view = GameView()
+        self.window.show_view(game_view)
+
+    def open_shop(self) -> None:
+        from .shop_view import ShopView
+
+        shop_view = ShopView(return_view="start")
+        self.window.show_view(shop_view)
+
+    def on_draw(self) -> None:
+        super().on_draw()
+
+        # Vẽ các Sprite bằng SpriteList (chuẩn Arcade 3.3)
+        self.bg_list.draw()
+        self.bird_list.draw()
+
+        # Tiêu đề game
+        self.title_text.draw()
+
+        # Highscore
+        self.best_score_text.draw()
+
+        # Hướng dẫn Space để chơi (nhấp nháy nhẹ)
+        self.prompt_text.draw()
+
+        # Nút SHOP & SKINS
+        sb_left, sb_right, sb_bot, sb_top = self.shop_button_bounds
+        arcade.draw_lrbt_rectangle_filled(
+            sb_left,
+            sb_right,
+            sb_bot,
+            sb_top,
+            (35, 75, 120, 230),
+        )
+        arcade.draw_lrbt_rectangle_outline(
+            sb_left,
+            sb_right,
+            sb_bot,
+            sb_top,
+            (100, 180, 255, 255),
+            2,
+        )
+        self.shop_btn_text.draw()
+
+        # Hiển thị số Coin ở góc phải trên
+        self.coins_text.draw()
+
