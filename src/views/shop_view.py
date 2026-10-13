@@ -138,6 +138,7 @@ class ShopView(BaseView):
             anchor_y="center",
             bold=True,
         )
+        self.update_preview_texture()
 
     def update_ui_texts(self) -> None:
         """Cập nhật nội dung các text động khi chuyển đổi hoặc mua skin."""
@@ -198,6 +199,10 @@ class ShopView(BaseView):
         tex = self.skin_textures.get(current_skin.id)
         if tex:
             self.preview_sprite.texture = tex
+            if getattr(tex, "height", 0) > 0:
+                self.preview_sprite.scale = (24.0 / float(tex.height)) * 1.5
+            else:
+                self.preview_sprite.scale = 1.5
 
     def on_update(self, delta_time: float) -> None:
         self.time += delta_time

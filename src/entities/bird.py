@@ -21,11 +21,18 @@ class Bird(arcade.Sprite):
     def __init__(
         self,
         texture: Optional[arcade.Texture] = None,
-        scale: float = 1.0,
+        scale: Optional[float] = None,
         center_x: float = 0.0,
         center_y: float = 0.0,
         **kwargs,
     ) -> None:
+        # Tự động tính scale sao cho chiều cao hiển thị luôn = STANDARD_HITBOX_HEIGHT (24.0 px)
+        if scale is None:
+            if texture is not None and getattr(texture, "height", 0) > 0:
+                scale = STANDARD_HITBOX_HEIGHT / float(texture.height)
+            else:
+                scale = 1.0
+
         super().__init__(
             path_or_texture=texture,
             scale=scale,
@@ -42,6 +49,15 @@ class Bird(arcade.Sprite):
 
         # Vận tốc theo trục Y
         self.velocity_y: float = 0.0
+
+    def set_skin_texture(self, texture: Optional[arcade.Texture]) -> None:
+        """Cập nhật texture mới cho chim và tự động cân chỉnh scale phù hợp."""
+        self.texture = texture
+        if texture is not None and getattr(texture, "height", 0) > 0:
+            self.scale = STANDARD_HITBOX_HEIGHT / float(texture.height)
+        else:
+            self.scale = 1.0
+
 
     def flap(self) -> None:
         """Thực hiện cú nhảy (vỗ cánh): gán vận tốc hướng lên và ngửa góc."""

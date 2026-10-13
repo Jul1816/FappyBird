@@ -65,4 +65,14 @@ DEFAULT_SKINS: list[Skin] = [
         sprite_path=str(ASSETS_DIR / "skins" / "golden_bird.png"),
         description="Mở khóa khi tích lũy tổng cộng >= 50 Coins.",
     ),
+    Skin(
+        id="custom_robin",
+        name="Robin Thiên Thần (Custom)",
+        price=0,
+        unlock_type="default",
+        unlock_value=0,
+        sprite_path=str(ASSETS_DIR / "skins" / "custom_robin.png"),
+        description="Skin tùy chỉnh thử nghiệm: Robin Thiên Thần thu nhỏ khớp chuẩn chiều cao hitbox 24px.",
+    ),
 ]
+
