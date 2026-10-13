@@ -53,11 +53,11 @@ def create_pixel_cyber_bird(base_bird_path: Path, dst_path: Path) -> None:
 
 
 def create_pixel_golden_bird(base_bird_path: Path, dst_path: Path) -> None:
-    """Tạo skin Golden Bird pixel art 34x24 dựa trên phôi chim gốc với vương miện hoàng kim."""
+    """Tạo skin Golden Bird pixel art 34x24 dựa trên phôi chim gốc với vương miện hoàng kim trên đỉnh mào đầu."""
     with Image.open(base_bird_path) as img:
         rgba = img.convert("RGBA")
     
-    # Tăng ánh kim rực rỡ
+    # 1. Tăng ánh kim rực rỡ cho thân chim
     data = list(rgba.getdata())
     new_data = []
     for r, g, b, a in data:
@@ -71,9 +71,30 @@ def create_pixel_golden_bird(base_bird_path: Path, dst_path: Path) -> None:
     rgba.putdata(new_data)
     draw = ImageDraw.Draw(rgba)
     
-    # Vẽ vương miện hoàng kim tí hon trên đầu (x=13..21, y=1..6)
-    draw.polygon([(14, 6), (12, 2), (15, 4), (17, 1), (19, 4), (22, 2), (20, 6)], fill=(255, 215, 0, 255), outline=(180, 130, 0, 255))
-    draw.point((17, 3), fill=(230, 20, 20, 255))  # Ngọc ruby đỏ
+    # 2. Vương miện hoàng kim 3 chóp trên mào đầu (x=13..19, y=0..2)
+    # Hoàn toàn nằm ngoài vùng mắt (x >= 20), bảo toàn 100% kích thước 34x24 và hitbox
+    GOLD_LIGHT = (255, 245, 100, 255)
+    GOLD_MID = (255, 215, 0, 255)
+    GOLD_DARK = (180, 130, 0, 255)
+    RUBY = (230, 25, 25, 255)
+    
+    # Row 0: 3 đỉnh chóp vàng ánh kim
+    draw.point((13, 0), fill=GOLD_LIGHT)
+    draw.point((16, 0), fill=GOLD_LIGHT)
+    draw.point((19, 0), fill=GOLD_LIGHT)
+    
+    # Row 1: Thân vương miện + ngọc ruby ở tâm
+    for x in range(13, 20):
+        if x in (13, 19):
+            draw.point((x, 1), fill=GOLD_DARK)
+        elif x == 16:
+            draw.point((x, 1), fill=RUBY)
+        else:
+            draw.point((x, 1), fill=GOLD_MID)
+            
+    # Row 2: Đai đế vương miện viền đậm ôm sát mào đầu
+    for x in range(13, 19):
+        draw.point((x, 2), fill=GOLD_DARK)
     
     dst_path.parent.mkdir(parents=True, exist_ok=True)
     rgba.save(dst_path, "PNG")
