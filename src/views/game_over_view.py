@@ -46,6 +46,13 @@ class GameOverView(BaseView):
         r_bot, r_top = self.btn_replay[2], self.btn_replay[3]
         s_bot, s_top = self.btn_shop[2], self.btn_shop[3]
 
+        # Sprite tiêu đề GAME OVER retro
+        self.gameover_sprite = arcade.Sprite(ASSETS_DIR / "sprites" / "gameover.png")
+        self.gameover_sprite.center_x = SCREEN_WIDTH / 2.0
+        self.gameover_sprite.center_y = SCREEN_HEIGHT - 110.0
+        self.gameover_list = arcade.SpriteList()
+        self.gameover_list.append(self.gameover_sprite)
+
         # Khởi tạo các đối tượng arcade.Text
         self.game_over_text = arcade.Text(
             "GAME OVER",
@@ -165,8 +172,8 @@ class GameOverView(BaseView):
 
         self.bg_list.draw()
 
-        # Tiêu đề GAME OVER
-        self.game_over_text.draw()
+        # Tiêu đề GAME OVER bằng sprite retro
+        self.gameover_list.draw()
 
         # Hộp Bảng Điểm (Scorecard)
         card_cx = SCREEN_WIDTH / 2.0

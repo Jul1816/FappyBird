@@ -40,6 +40,13 @@ class StartView(BaseView):
         )
         sb_bot, sb_top = self.shop_button_bounds[2], self.shop_button_bounds[3]
 
+        # Sprite thông điệp chào mừng (Get Ready / Flappy Bird retro)
+        self.message_sprite = arcade.Sprite(ASSETS_DIR / "sprites" / "message.png")
+        self.message_sprite.center_x = SCREEN_WIDTH / 2.0
+        self.message_sprite.center_y = 310.0
+        self.message_list = arcade.SpriteList()
+        self.message_list.append(self.message_sprite)
+
         # Khởi tạo các đối tượng arcade.Text cố định
         self.title_text = arcade.Text(
             "FLAPPY BIRD",
@@ -54,7 +61,7 @@ class StartView(BaseView):
         self.best_score_text = arcade.Text(
             "BEST SCORE: 0",
             SCREEN_WIDTH / 2.0,
-            SCREEN_HEIGHT - 155.0,
+            SCREEN_HEIGHT - 40.0,
             arcade.color.WHITE,
             font_size=12,
             anchor_x="center",
@@ -163,16 +170,11 @@ class StartView(BaseView):
 
         # Vẽ các Sprite bằng SpriteList (chuẩn Arcade 3.3)
         self.bg_list.draw()
+        self.message_list.draw()
         self.bird_list.draw()
 
-        # Tiêu đề game
-        self.title_text.draw()
-
-        # Highscore
+        # Highscore ở trên cùng
         self.best_score_text.draw()
-
-        # Hướng dẫn Space để chơi (nhấp nháy nhẹ)
-        self.prompt_text.draw()
 
         # Nút SHOP & SKINS
         sb_left, sb_right, sb_bot, sb_top = self.shop_button_bounds
