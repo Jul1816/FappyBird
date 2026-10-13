@@ -7,6 +7,7 @@ from ..constants import (
     ASSETS_DIR,
     BIRD_START_X,
     BIRD_START_Y,
+    FONT_RETRO_FAMILY,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
 )
@@ -53,50 +54,51 @@ class StartView(BaseView):
             SCREEN_WIDTH / 2.0,
             SCREEN_HEIGHT - 120.0,
             (255, 215, 0, 255),
-            font_size=24,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=16,
             anchor_x="center",
             anchor_y="center",
             bold=True,
         )
         self.best_score_text = arcade.Text(
-            "BEST SCORE: 0",
+            "BEST: 0",
             SCREEN_WIDTH / 2.0,
-            SCREEN_HEIGHT - 40.0,
+            SCREEN_HEIGHT - 38.0,
             arcade.color.WHITE,
-            font_size=12,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=9,
             anchor_x="center",
             anchor_y="center",
-            bold=True,
         )
         self.prompt_text = arcade.Text(
             "[ SPACE ] TO PLAY",
             SCREEN_WIDTH / 2.0,
             SCREEN_HEIGHT - 260.0,
             arcade.color.WHITE,
-            font_size=13,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="center",
             anchor_y="center",
-            bold=True,
         )
         self.shop_btn_text = arcade.Text(
             "[ S ] SHOP",
             SCREEN_WIDTH / 2.0,
             (sb_bot + sb_top) / 2.0,
             arcade.color.WHITE,
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="center",
             anchor_y="center",
-            bold=True,
         )
         self.coins_text = arcade.Text(
-            "Coins: 0",
-            SCREEN_WIDTH - 12.0,
-            SCREEN_HEIGHT - 18.0,
+            "COINS: 0",
+            SCREEN_WIDTH - 10.0,
+            SCREEN_HEIGHT - 16.0,
             (255, 215, 0, 255),
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="right",
             anchor_y="center",
-            bold=True,
         )
 
     def on_show_view(self) -> None:
@@ -106,8 +108,8 @@ class StartView(BaseView):
 
         # Cập nhật nội dung text theo dữ liệu save_data hiện tại
         best_score = self.flappy_window.save_data.high_score
-        self.best_score_text.text = f"BEST SCORE: {best_score}"
-        self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+        self.best_score_text.text = f"BEST: {best_score}"
+        self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
 
         texture = self.flappy_window.current_skin_texture
         self.bird = Bird(

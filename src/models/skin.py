@@ -18,61 +18,61 @@ class Skin:
     description: str = ""
 
 
-# Danh mục 5 skin khởi tạo
+# Danh mục 6 skin khởi tạo
 DEFAULT_SKINS: list[Skin] = [
     Skin(
         id="classic",
-        name="Vàng Cổ Điển",
+        name="Classic Yellow",
         price=0,
         unlock_type="default",
         unlock_value=0,
         sprite_path=str(ASSETS_DIR / "skins" / "classic.png"),
-        description="Chú chim màu vàng huyền thoại.",
+        description="The legendary yellow bird.",
     ),
     Skin(
         id="blue_bird",
-        name="Chim Xanh Dương",
+        name="Swift Blue",
         price=10,
         unlock_type="coin",
         unlock_value=10,
         sprite_path=str(ASSETS_DIR / "skins" / "blue_bird.png"),
-        description="Chú chim xanh nhanh nhẹn (10 Coins).",
+        description="Agile blue flyer (10 Coins).",
     ),
     Skin(
         id="red_bird",
-        name="Chim Lửa Đỏ",
+        name="Fiery Red",
         price=25,
         unlock_type="coin",
         unlock_value=25,
         sprite_path=str(ASSETS_DIR / "skins" / "red_bird.png"),
-        description="Chú chim đỏ dũng mãnh (25 Coins).",
+        description="Bold red champion (25 Coins).",
     ),
     Skin(
         id="cyber_bird",
-        name="Chim Cơ Khí",
+        name="Cyber Bird",
         price=0,
         unlock_type="highscore",
         unlock_value=20,
         sprite_path=str(ASSETS_DIR / "skins" / "cyber_bird.png"),
-        description="Mở khóa khi đạt High Score >= 20.",
+        description="Unlock at High Score >= 20.",
     ),
     Skin(
         id="golden_bird",
-        name="Chim Hoàng Kim",
+        name="Golden Bird",
         price=0,
         unlock_type="total_coins",
         unlock_value=50,
         sprite_path=str(ASSETS_DIR / "skins" / "golden_bird.png"),
-        description="Mở khóa khi tích lũy tổng cộng >= 50 Coins.",
+        description="Unlock at Total Coins >= 50.",
     ),
     Skin(
         id="custom_robin",
-        name="Robin Thiên Thần (Custom)",
+        name="Angel Robin",
         price=0,
         unlock_type="default",
         unlock_value=0,
         sprite_path=str(ASSETS_DIR / "skins" / "custom_robin.png"),
-        description="Skin tùy chỉnh thử nghiệm: Robin Thiên Thần thu nhỏ khớp chuẩn chiều cao hitbox 24px.",
+        description="Custom skin: Angel Robin auto-fit to 24px.",
     ),
 ]
 

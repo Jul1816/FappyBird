@@ -7,6 +7,7 @@ from ..constants import (
     BIRD_START_Y,
     FIXED_DT,
     FLOOR_HEIGHT,
+    FONT_RETRO_FAMILY,
     SCORE_PER_COIN,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
@@ -60,22 +61,22 @@ class GameView(BaseView):
             bold=True,
         )
         self.coins_text = arcade.Text(
-            "Coins: 0",
-            SCREEN_WIDTH - 12.0,
-            SCREEN_HEIGHT - 18.0,
+            "COINS: 0",
+            SCREEN_WIDTH - 10.0,
+            SCREEN_HEIGHT - 16.0,
             (255, 215, 0, 255),
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="right",
             anchor_y="center",
-            bold=True,
         )
         self.god_mode_text = arcade.Text(
             "GOD MODE ON",
             10.0,
-            SCREEN_HEIGHT - 18.0,
+            SCREEN_HEIGHT - 16.0,
             arcade.color.GREEN,
-            font_size=10,
-            bold=True,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=7,
         )
 
 
@@ -91,7 +92,7 @@ class GameView(BaseView):
         self.is_dead = False
         self.score_display.set_score(0)
         self.score_text.text = "0"
-        self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+        self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
 
         # Khởi tạo chim với texture skin hiện tại
         texture = self.flappy_window.current_skin_texture
@@ -126,7 +127,7 @@ class GameView(BaseView):
             self.flappy_window.save_data.coins += 10
             self.flappy_window.save_data.total_coins_collected += 10
             self.flappy_window.save_progress()
-            self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+            self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
         elif symbol == arcade.key.F2:
             # F2: Bật/tắt vẽ Hitbox đỏ
             self.flappy_window.debug_hitbox = not self.flappy_window.debug_hitbox
@@ -137,7 +138,7 @@ class GameView(BaseView):
             self.flappy_window.save_data.coins += 2
             self.flappy_window.save_data.total_coins_collected += 2
             self.score_text.text = f"{self.score}"
-            self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+            self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
         elif symbol == arcade.key.F4:
             # F4: Bật/tắt God Mode
             self.flappy_window.god_mode = not self.flappy_window.god_mode
@@ -191,7 +192,7 @@ class GameView(BaseView):
                     self.coins_earned += new_coins
                     self.flappy_window.save_data.coins += new_coins
                     self.flappy_window.save_data.total_coins_collected += new_coins
-                    self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+                    self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
 
             # Kiểm tra trần nhà
             if self.bird.top >= SCREEN_HEIGHT:

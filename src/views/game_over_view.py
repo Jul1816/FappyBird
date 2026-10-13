@@ -3,6 +3,7 @@ import arcade
 
 from ..constants import (
     ASSETS_DIR,
+    FONT_RETRO_FAMILY,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
 )
@@ -59,7 +60,8 @@ class GameOverView(BaseView):
             SCREEN_WIDTH / 2.0,
             SCREEN_HEIGHT - 100.0,
             (230, 45, 45, 255),
-            font_size=24,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=16,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -69,7 +71,8 @@ class GameOverView(BaseView):
             card_cx,
             card_cy + 35.0,
             (50, 40, 20, 255),
-            font_size=15,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=10,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -77,29 +80,31 @@ class GameOverView(BaseView):
         self.best_text = arcade.Text(
             "BEST: 0",
             card_cx,
-            card_cy + 5.0,
+            card_cy + 10.0,
             (180, 60, 20, 255),
-            font_size=13,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=10,
             anchor_x="center",
             anchor_y="center",
             bold=True,
         )
         self.coins_earned_text = arcade.Text(
-            f"+{self.coins_earned} Coins Earned!",
+            f"+{self.coins_earned} COINS EARNED",
             card_cx,
-            card_cy - 22.0,
+            card_cy - 18.0,
             (140, 110, 0, 255),
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="center",
             anchor_y="center",
-            bold=True,
         )
         self.total_coins_text = arcade.Text(
-            "Total Coins: 0",
+            "TOTAL COINS: 0",
             card_cx,
-            card_cy - 42.0,
+            card_cy - 40.0,
             (70, 60, 50, 255),
-            font_size=10,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="center",
             anchor_y="center",
         )
@@ -108,27 +113,28 @@ class GameOverView(BaseView):
             card_cx,
             (r_bot + r_top) / 2.0,
             arcade.color.WHITE,
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="center",
             anchor_y="center",
-            bold=True,
         )
         self.shop_btn_text = arcade.Text(
             "[ S ] SHOP",
             card_cx,
             (s_bot + s_top) / 2.0,
             arcade.color.WHITE,
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="center",
             anchor_y="center",
-            bold=True,
         )
 
     def on_show_view(self) -> None:
         super().on_show_view()
         best_score = self.flappy_window.save_data.high_score
         self.best_text.text = f"BEST: {best_score}"
-        self.total_coins_text.text = f"Total Coins: {self.flappy_window.save_data.coins}"
+        self.coins_earned_text.text = f"+{self.coins_earned} COINS EARNED"
+        self.total_coins_text.text = f"TOTAL COINS: {self.flappy_window.save_data.coins}"
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         super().on_key_press(symbol, modifiers)

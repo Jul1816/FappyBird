@@ -4,7 +4,7 @@ from typing import Optional
 
 import arcade
 
-from ..constants import ASSETS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH
+from ..constants import ASSETS_DIR, FONT_RETRO_FAMILY, SCREEN_HEIGHT, SCREEN_WIDTH
 from ..entities.floor import Floor
 from ..models.skin import DEFAULT_SKINS, Skin
 from ..services.skin_manager import SkinManager
@@ -58,33 +58,35 @@ class ShopView(BaseView):
         act_cy = (self.btn_action[2] + self.btn_action[3]) / 2.0
         b_cy = (self.btn_back[2] + self.btn_back[3]) / 2.0
 
-        # Khởi tạo các đối tượng arcade.Text
+        # Khởi tạo các đối tượng arcade.Text với font pixel retro
         self.title_text = arcade.Text(
             "SKIN SHOP",
             SCREEN_WIDTH / 2.0,
             SCREEN_HEIGHT - 45.0,
             (255, 215, 0, 255),
-            font_size=20,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=14,
             anchor_x="center",
             anchor_y="center",
             bold=True,
         )
         self.coins_text = arcade.Text(
-            "Coins: 0",
-            SCREEN_WIDTH - 12.0,
-            SCREEN_HEIGHT - 18.0,
+            "COINS: 0",
+            SCREEN_WIDTH - 10.0,
+            SCREEN_HEIGHT - 16.0,
             (255, 215, 0, 255),
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="right",
             anchor_y="center",
-            bold=True,
         )
         self.prev_btn_text = arcade.Text(
             "<",
             45.0,
             300.0,
             arcade.color.WHITE,
-            font_size=18,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=12,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -94,7 +96,8 @@ class ShopView(BaseView):
             SCREEN_WIDTH - 45.0,
             300.0,
             arcade.color.WHITE,
-            font_size=18,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=12,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -104,7 +107,8 @@ class ShopView(BaseView):
             SCREEN_WIDTH / 2.0,
             218.0,
             arcade.color.WHITE,
-            font_size=13,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -114,7 +118,8 @@ class ShopView(BaseView):
             SCREEN_WIDTH / 2.0,
             195.0,
             (200, 215, 230, 255),
-            font_size=9,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=7,
             anchor_x="center",
             anchor_y="center",
         )
@@ -123,17 +128,19 @@ class ShopView(BaseView):
             SCREEN_WIDTH / 2.0,
             act_cy,
             arcade.color.WHITE,
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="center",
             anchor_y="center",
             bold=True,
         )
         self.back_btn_text = arcade.Text(
-            "[ ESC ] TRỞ VỀ",
+            "[ ESC ] BACK",
             SCREEN_WIDTH / 2.0,
             b_cy,
             (210, 220, 230, 255),
-            font_size=10,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=8,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -147,32 +154,32 @@ class ShopView(BaseView):
         is_equipped = current_skin.id == save_data.equipped_skin
         is_unlocked = self.skin_manager.is_unlocked(current_skin, save_data)
 
-        self.coins_text.text = f"Coins: {save_data.coins}"
+        self.coins_text.text = f"COINS: {save_data.coins}"
         self.skin_name_text.text = f"{current_skin.name} ({self.selected_index + 1}/{len(self.skins)})"
         self.skin_desc_text.text = current_skin.description
 
         if is_equipped:
-            self.action_btn_text.text = "[ ĐANG DÙNG ]"
+            self.action_btn_text.text = "[ EQUIPPED ]"
             self.action_btn_text.color = arcade.color.WHITE
-            self.action_btn_text.font_size = 11
+            self.action_btn_text.font_size = 8
         elif is_unlocked:
-            self.action_btn_text.text = "TRANG BỊ (EQUIP)"
+            self.action_btn_text.text = "[ EQUIP ]"
             self.action_btn_text.color = arcade.color.WHITE
-            self.action_btn_text.font_size = 11
+            self.action_btn_text.font_size = 8
         else:
             if current_skin.unlock_type == "coin":
                 if save_data.coins >= current_skin.price:
-                    self.action_btn_text.text = f"MUA ({current_skin.price} COINS)"
+                    self.action_btn_text.text = f"[ BUY {current_skin.price} ]"
                     self.action_btn_text.color = arcade.color.WHITE
-                    self.action_btn_text.font_size = 11
+                    self.action_btn_text.font_size = 8
                 else:
-                    self.action_btn_text.text = f"CẦN {current_skin.price} COINS"
+                    self.action_btn_text.text = f"NEED {current_skin.price} COINS"
                     self.action_btn_text.color = (180, 180, 190, 255)
-                    self.action_btn_text.font_size = 10
+                    self.action_btn_text.font_size = 7
             else:
-                self.action_btn_text.text = "[ KHÓA THÀNH TỰU ]"
+                self.action_btn_text.text = "[ LOCKED ]"
                 self.action_btn_text.color = (230, 180, 180, 255)
-                self.action_btn_text.font_size = 10
+                self.action_btn_text.font_size = 8
 
     def on_show_view(self) -> None:
         super().on_show_view()
