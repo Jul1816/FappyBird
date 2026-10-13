@@ -197,8 +197,8 @@ def ensure_audio_files(audio_dir: Path) -> None:
             generate_synthesized_wav(dest, duration=0.18, freq=freq)
 
 
-def generate_all_assets() -> None:
-    """Tạo toàn bộ placeholder assets cho game."""
+def generate_all_assets(overwrite: bool = True) -> None:
+    """Tạo toàn bộ placeholder assets cho game nếu chưa có hoặc khi overwrite=True."""
     sprites_dir = ASSETS_DIR / "sprites"
     skins_dir = ASSETS_DIR / "skins"
     audio_dir = ASSETS_DIR / "audio"
@@ -207,43 +207,55 @@ def generate_all_assets() -> None:
     skins_dir.mkdir(parents=True, exist_ok=True)
     audio_dir.mkdir(parents=True, exist_ok=True)
 
+    def _save_if(img: Image.Image, path: Path) -> None:
+        if overwrite or not path.exists():
+            img.save(path)
+
     # 1. Sprites môi trường
-    create_background_day().save(sprites_dir / "background-day.png")
-    create_background_night().save(sprites_dir / "background-night.png")
-    create_base_texture().save(sprites_dir / "base.png")
-    create_pipe_texture().save(sprites_dir / "pipe-green.png")
-    create_pipe_texture(color_body=(220, 60, 60), color_highlight=(250, 100, 100), color_shadow=(160, 40, 40)).save(sprites_dir / "pipe-red.png")
-    create_coin_texture().save(sprites_dir / "coin.png")
+    _save_if(create_background_day(), sprites_dir / "background-day.png")
+    _save_if(create_background_night(), sprites_dir / "background-night.png")
+    _save_if(create_base_texture(), sprites_dir / "base.png")
+    _save_if(create_pipe_texture(), sprites_dir / "pipe-green.png")
+    _save_if(
+        create_pipe_texture(color_body=(220, 60, 60), color_highlight=(250, 100, 100), color_shadow=(160, 40, 40)),
+        sprites_dir / "pipe-red.png",
+    )
+    _save_if(create_coin_texture(), sprites_dir / "coin.png")
 
     # 2. Skins chim (Kích thước linh hoạt, thân chim chuẩn)
     # classic (34x24)
-    create_bird_skin((34, 24), body_color=(250, 200, 40), belly_color=(255, 230, 120), wing_color=(240, 120, 40), beak_color=(255, 100, 0)).save(
-        skins_dir / "classic.png"
+    _save_if(
+        create_bird_skin((34, 24), body_color=(250, 200, 40), belly_color=(255, 230, 120), wing_color=(240, 120, 40), beak_color=(255, 100, 0)),
+        skins_dir / "classic.png",
     )
     # blue_bird (32x32)
-    create_bird_skin((32, 32), body_color=(40, 150, 240), belly_color=(120, 200, 255), wing_color=(20, 90, 190), beak_color=(255, 150, 0)).save(
-        skins_dir / "blue_bird.png"
+    _save_if(
+        create_bird_skin((32, 32), body_color=(40, 150, 240), belly_color=(120, 200, 255), wing_color=(20, 90, 190), beak_color=(255, 150, 0)),
+        skins_dir / "blue_bird.png",
     )
     # red_bird (32x32)
-    create_bird_skin((32, 32), body_color=(230, 50, 50), belly_color=(255, 120, 120), wing_color=(170, 20, 20), beak_color=(255, 180, 0)).save(
-        skins_dir / "red_bird.png"
+    _save_if(
+        create_bird_skin((32, 32), body_color=(230, 50, 50), belly_color=(255, 120, 120), wing_color=(170, 20, 20), beak_color=(255, 180, 0)),
+        skins_dir / "red_bird.png",
     )
     # cyber_bird (48x32)
-    create_bird_skin((48, 32), body_color=(180, 190, 200), belly_color=(130, 140, 150), wing_color=(90, 100, 110), beak_color=(0, 220, 200), extra_feature="cyber").save(
-        skins_dir / "cyber_bird.png"
+    _save_if(
+        create_bird_skin((48, 32), body_color=(180, 190, 200), belly_color=(130, 140, 150), wing_color=(90, 100, 110), beak_color=(0, 220, 200), extra_feature="cyber"),
+        skins_dir / "cyber_bird.png",
     )
     # golden_bird (64x64)
-    create_bird_skin((64, 64), body_color=(255, 215, 0), belly_color=(255, 245, 150), wing_color=(218, 165, 32), beak_color=(255, 90, 0), extra_feature="crown").save(
-        skins_dir / "golden_bird.png"
+    _save_if(
+        create_bird_skin((64, 64), body_color=(255, 215, 0), belly_color=(255, 245, 150), wing_color=(218, 165, 32), beak_color=(255, 90, 0), extra_feature="crown"),
+        skins_dir / "golden_bird.png",
     )
 
     # 3. Âm thanh
     ensure_audio_files(audio_dir)
-    print("Placeholder assets generated successfully!")
+    print("Assets ensured successfully!")
 
 
-def ensure_assets_exist() -> None:
-    """Tự động kiểm tra và sinh asset nếu thiếu (DX Magic Moment)."""
+def ensure_assets_exist(overwrite: bool = False) -> None:
+    """Tự động kiểm tra và sinh asset nếu thiếu mà không ghi đè tài nguyên hiện có."""
     required_files = [
         ASSETS_DIR / "sprites" / "background-day.png",
         ASSETS_DIR / "sprites" / "base.png",
@@ -252,8 +264,9 @@ def ensure_assets_exist() -> None:
         ASSETS_DIR / "audio" / "wing.wav",
     ]
     if any(not f.exists() for f in required_files):
-        generate_all_assets()
+        generate_all_assets(overwrite=overwrite)
 
 
 if __name__ == "__main__":
     generate_all_assets()
+
