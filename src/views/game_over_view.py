@@ -26,18 +26,18 @@ class GameOverView(BaseView):
         self.bg_list.append(self.background)
         self.bg_list.append(self.floor)
 
-        # Vùng nút Replay
+        # Vùng nút Replay (rộng 160px để chứa gọn "[ SPACE ] REPLAY")
         self.btn_replay = (
-            SCREEN_WIDTH / 2.0 - 55.0,  # left
-            SCREEN_WIDTH / 2.0 + 55.0,  # right
+            SCREEN_WIDTH / 2.0 - 80.0,  # left
+            SCREEN_WIDTH / 2.0 + 80.0,  # right
             135.0,                       # bottom
             170.0,                       # top
         )
 
-        # Vùng nút Shop
+        # Vùng nút Shop (rộng 160px đồng bộ kích thước cân đối)
         self.btn_shop = (
-            SCREEN_WIDTH / 2.0 - 55.0,
-            SCREEN_WIDTH / 2.0 + 55.0,
+            SCREEN_WIDTH / 2.0 - 80.0,
+            SCREEN_WIDTH / 2.0 + 80.0,
             85.0,
             120.0,
         )
@@ -54,14 +54,14 @@ class GameOverView(BaseView):
         self.gameover_list = arcade.SpriteList()
         self.gameover_list.append(self.gameover_sprite)
 
-        # Khởi tạo các đối tượng arcade.Text
+        # Khởi tạo các đối tượng arcade.Text (font_size=6 chuẩn 1-bit pixel art)
         self.game_over_text = arcade.Text(
             "GAME OVER",
             SCREEN_WIDTH / 2.0,
             SCREEN_HEIGHT - 100.0,
             (230, 45, 45, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=16,
+            font_size=12,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -72,7 +72,7 @@ class GameOverView(BaseView):
             card_cy + 35.0,
             (50, 40, 20, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=10,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -80,10 +80,10 @@ class GameOverView(BaseView):
         self.best_text = arcade.Text(
             "BEST: 0",
             card_cx,
-            card_cy + 10.0,
+            card_cy + 12.0,
             (180, 60, 20, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=10,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -91,20 +91,20 @@ class GameOverView(BaseView):
         self.coins_earned_text = arcade.Text(
             f"+{self.coins_earned} COINS EARNED",
             card_cx,
-            card_cy - 18.0,
+            card_cy - 12.0,
             (140, 110, 0, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=8,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
         )
         self.total_coins_text = arcade.Text(
             "TOTAL COINS: 0",
             card_cx,
-            card_cy - 40.0,
+            card_cy - 35.0,
             (70, 60, 50, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=8,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
         )
@@ -114,7 +114,7 @@ class GameOverView(BaseView):
             (r_bot + r_top) / 2.0,
             arcade.color.WHITE,
             font_name=FONT_RETRO_FAMILY,
-            font_size=8,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
         )
@@ -124,7 +124,7 @@ class GameOverView(BaseView):
             (s_bot + s_top) / 2.0,
             arcade.color.WHITE,
             font_name=FONT_RETRO_FAMILY,
-            font_size=8,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
         )

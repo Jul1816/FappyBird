@@ -52,20 +52,20 @@ class ShopView(BaseView):
         # Vùng click các nút UI (unprojected mouse bounds)
         self.btn_prev = (25.0, 65.0, 275.0, 325.0)    # Nút [<]
         self.btn_next = (223.0, 263.0, 275.0, 325.0)  # Nút [>]
-        self.btn_action = (SCREEN_WIDTH / 2.0 - 75.0, SCREEN_WIDTH / 2.0 + 75.0, 135.0, 175.0) # Nút Mua/Trang bị
-        self.btn_back = (SCREEN_WIDTH / 2.0 - 55.0, SCREEN_WIDTH / 2.0 + 55.0, 45.0, 80.0)      # Nút Trở về
+        self.btn_action = (SCREEN_WIDTH / 2.0 - 75.0, SCREEN_WIDTH / 2.0 + 75.0, 135.0, 175.0) # Nút Mua/Trang bị (rộng 150px)
+        self.btn_back = (SCREEN_WIDTH / 2.0 - 70.0, SCREEN_WIDTH / 2.0 + 70.0, 45.0, 80.0)      # Nút Trở về (rộng 140px chứa gọn "[ ESC ] BACK")
 
         act_cy = (self.btn_action[2] + self.btn_action[3]) / 2.0
         b_cy = (self.btn_back[2] + self.btn_back[3]) / 2.0
 
-        # Khởi tạo các đối tượng arcade.Text với font pixel retro
+        # Khởi tạo các đối tượng arcade.Text với font pixel retro (font_size=6/12 chuẩn 1-bit pixel art)
         self.title_text = arcade.Text(
             "SKIN SHOP",
             SCREEN_WIDTH / 2.0,
             SCREEN_HEIGHT - 45.0,
             (255, 215, 0, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=14,
+            font_size=12,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -76,7 +76,7 @@ class ShopView(BaseView):
             SCREEN_HEIGHT - 16.0,
             (255, 215, 0, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=8,
+            font_size=6,
             anchor_x="right",
             anchor_y="center",
         )
@@ -108,7 +108,7 @@ class ShopView(BaseView):
             218.0,
             arcade.color.WHITE,
             font_name=FONT_RETRO_FAMILY,
-            font_size=8,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -119,9 +119,12 @@ class ShopView(BaseView):
             195.0,
             (200, 215, 230, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=7,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
+            multiline=True,
+            width=240,
+            align="center",
         )
         self.action_btn_text = arcade.Text(
             "",
@@ -129,7 +132,7 @@ class ShopView(BaseView):
             act_cy,
             arcade.color.WHITE,
             font_name=FONT_RETRO_FAMILY,
-            font_size=8,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -140,7 +143,7 @@ class ShopView(BaseView):
             b_cy,
             (210, 220, 230, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=8,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -161,25 +164,25 @@ class ShopView(BaseView):
         if is_equipped:
             self.action_btn_text.text = "[ EQUIPPED ]"
             self.action_btn_text.color = arcade.color.WHITE
-            self.action_btn_text.font_size = 8
+            self.action_btn_text.font_size = 6
         elif is_unlocked:
             self.action_btn_text.text = "[ EQUIP ]"
             self.action_btn_text.color = arcade.color.WHITE
-            self.action_btn_text.font_size = 8
+            self.action_btn_text.font_size = 6
         else:
             if current_skin.unlock_type == "coin":
                 if save_data.coins >= current_skin.price:
                     self.action_btn_text.text = f"[ BUY {current_skin.price} ]"
                     self.action_btn_text.color = arcade.color.WHITE
-                    self.action_btn_text.font_size = 8
+                    self.action_btn_text.font_size = 6
                 else:
                     self.action_btn_text.text = f"NEED {current_skin.price} COINS"
                     self.action_btn_text.color = (180, 180, 190, 255)
-                    self.action_btn_text.font_size = 7
+                    self.action_btn_text.font_size = 6
             else:
                 self.action_btn_text.text = "[ LOCKED ]"
                 self.action_btn_text.color = (230, 180, 180, 255)
-                self.action_btn_text.font_size = 8
+                self.action_btn_text.font_size = 6
 
     def on_show_view(self) -> None:
         super().on_show_view()

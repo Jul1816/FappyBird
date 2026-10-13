@@ -21,6 +21,15 @@ def convert_and_save(src_path: Path, dst_path: Path) -> None:
         rgba.save(dst_path, "PNG")
 
 
+def erase_grey_bird_from_message(dst_path: Path) -> None:
+    """Xóa bỏ hoàn toàn icon chim màu xám trong message.png (rows 168..202, cols 68..112)."""
+    with Image.open(dst_path) as img:
+        rgba = img.convert("RGBA")
+        draw = ImageDraw.Draw(rgba)
+        draw.rectangle([68, 168, 112, 202], fill=(0, 0, 0, 0))
+        rgba.save(dst_path, "PNG")
+
+
 def create_pixel_cyber_bird(base_bird_path: Path, dst_path: Path) -> None:
     """Tạo skin Cyber Bird pixel art 34x24 dựa trên phôi chim gốc với visor neon cyan."""
     with Image.open(base_bird_path) as img:
@@ -126,7 +135,10 @@ def import_all_assets(
     for name in env_sprites:
         src = ref_dir / name
         if src.exists():
-            convert_and_save(src, sprites_dst / name)
+            dst = sprites_dst / name
+            convert_and_save(src, dst)
+            if name == "message.png":
+                erase_grey_bird_from_message(dst)
 
     # 2. Chữ số retro 0-9
     for i in range(10):

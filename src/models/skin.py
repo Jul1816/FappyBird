@@ -72,7 +72,7 @@ DEFAULT_SKINS: list[Skin] = [
         unlock_type="default",
         unlock_value=0,
         sprite_path=str(ASSETS_DIR / "skins" / "custom_robin.png"),
-        description="Custom skin: Angel Robin auto-fit to 24px.",
+        description="Angel Robin custom skin.",
     ),
 ]
 

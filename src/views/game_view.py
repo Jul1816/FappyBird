@@ -66,7 +66,7 @@ class GameView(BaseView):
             SCREEN_HEIGHT - 16.0,
             (255, 215, 0, 255),
             font_name=FONT_RETRO_FAMILY,
-            font_size=8,
+            font_size=6,
             anchor_x="right",
             anchor_y="center",
         )
@@ -76,7 +76,7 @@ class GameView(BaseView):
             SCREEN_HEIGHT - 16.0,
             arcade.color.GREEN,
             font_name=FONT_RETRO_FAMILY,
-            font_size=7,
+            font_size=6,
         )
 
 

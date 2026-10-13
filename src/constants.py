@@ -1,6 +1,10 @@
 """Hằng số trò chơi Flappy Bird (Arcade 3.3.3)."""
 from pathlib import Path
 
+import pyglet
+# Tắt DirectWrite/font antialiasing toàn cục để render pixel art font 100% sắc nét (1-bit binary alpha)
+pyglet.options.text_antialiasing = False
+
 # Thư mục gốc & đường dẫn assets
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ASSETS_DIR = PROJECT_ROOT / "assets"

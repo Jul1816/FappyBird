@@ -1,9 +1,13 @@
 """Entry point chính của trò chơi Flappy Bird (Arcade 3.3.3)."""
 from typing import Optional
 
+import pyglet
+# Tắt DirectWrite/font antialiasing toàn cục cho pixel art typography
+pyglet.options.text_antialiasing = False
+import pyglet.gl as gl
+
 import arcade
 from arcade.texture_atlas.atlas_default import DefaultTextureAtlas
-import pyglet.gl as gl
 
 from .constants import ASSETS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH, ensure_retro_font_loaded
 from .models.save_data import SaveData
