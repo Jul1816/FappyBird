@@ -14,6 +14,7 @@ from ..constants import (
 from ..entities.bird import Bird
 from ..entities.floor import Floor
 from ..entities.pipe import PipeManager
+from ..entities.score_display import ScoreDisplay
 from ..services.difficulty import DifficultyService
 from .base_view import BaseView
 
@@ -46,7 +47,8 @@ class GameView(BaseView):
         self.accumulator: float = 0.0
         self.is_dead: bool = False
 
-        # Khởi tạo các đối tượng arcade.Text
+        # Khởi tạo hiển thị điểm retro và các đối tượng arcade.Text
+        self.score_display = ScoreDisplay()
         self.score_text = arcade.Text(
             "0",
             SCREEN_WIDTH / 2.0,
@@ -87,6 +89,7 @@ class GameView(BaseView):
         self.coins_earned = 0
         self.accumulator = 0.0
         self.is_dead = False
+        self.score_display.set_score(0)
         self.score_text.text = "0"
         self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
 
@@ -179,6 +182,7 @@ class GameView(BaseView):
             if pts > 0:
                 old_score = self.score
                 self.score += pts
+                self.score_display.set_score(self.score)
                 self.score_text.text = f"{self.score}"
                 self.flappy_window.audio.play_point()
                 # Cứ 5 điểm nhận 1 coin (tính theo mốc vượt qua để không sót khi pts > 1)
@@ -248,8 +252,8 @@ class GameView(BaseView):
         # 4. Vẽ chim (SpriteList)
         self.bird_list.draw()
 
-        # 5. Vẽ UI (Điểm số ở giữa trên, Coin ở góc phải trên)
-        self.score_text.draw()
+        # 5. Vẽ UI (Điểm số retro sprite ở giữa trên, Coin ở góc phải trên)
+        self.score_display.draw()
         self.coins_text.draw()
 
         # 6. Vẽ Debug Overlay nếu bật F2
