@@ -5,7 +5,7 @@ import arcade
 from arcade.texture_atlas.atlas_default import DefaultTextureAtlas
 import pyglet.gl as gl
 
-from .constants import ASSETS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH
+from .constants import ASSETS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH, ensure_retro_font_loaded
 from .models.save_data import SaveData
 from .services.audio import AudioService
 from .services.skin_manager import SkinManager
@@ -32,6 +32,7 @@ class FlappyWindow(arcade.Window):
     def __init__(self, storage: Optional[StorageService] = None, visible: bool = True) -> None:
         # Tự động tạo asset placeholder nếu thiếu trước khi engine khởi chạy (DX-1)
         ensure_assets_exist()
+        ensure_retro_font_loaded()
 
         super().__init__(
             width=SCREEN_WIDTH,

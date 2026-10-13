@@ -54,3 +54,22 @@ LERP_SPEED_FACTOR = 4.0          # Tốc độ hội tụ của Lerp qua từng 
 
 # Kinh tế & Thành tựu
 SCORE_PER_COIN = 5               # Cứ 5 điểm nhận 1 coin
+
+# Font Retro 8-bit Pixel Art & Safe Fallback
+FONT_DIR = ASSETS_DIR / "fonts"
+FONT_RETRO_PATH = FONT_DIR / "PressStart2P-Regular.ttf"
+FONT_RETRO_NAME = "Press Start 2P"
+FONT_RETRO_FAMILY = ("Press Start 2P", "Arial")
+
+
+def ensure_retro_font_loaded() -> bool:
+    """Nạp font Press Start 2P toàn cục vào Arcade/Pyglet an toàn."""
+    if FONT_RETRO_PATH.exists():
+        try:
+            import arcade
+            arcade.load_font(FONT_RETRO_PATH)
+            return True
+        except Exception:
+            return False
+    return False
+
