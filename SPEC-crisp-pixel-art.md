@@ -86,31 +86,40 @@ class FlappyWindow(arcade.Window):
         self.ctx.default_atlas.texture.filter = (gl.GL_NEAREST, gl.GL_NEAREST)
 ```
 
-### 5.2. Hiển thị Điểm Số Bằng Sprite Số Retro (`ScoreDisplay`)
-- Quản lý `arcade.SpriteList` chứa các chữ số tạo từ `assets/sprites/digits/{digit}.png` ($24 \times 36\text{ px}$).
-- Căn giữa toàn bộ cụm chữ số theo trục $X$ tại vị trí $SCREEN\_WIDTH / 2.0$, $Y = SCREEN\_HEIGHT - 60.0$.
-- Cập nhật linh hoạt mỗi khi `score` thay đổi mà không gây rò rỉ bộ nhớ texture.
+### 5.2. Hiển thị Điểm Số Bằng Sprite Số Retro Đa Chữ Số (`ScoreDisplay`)
+- Quản lý `arcade.SpriteList` chứa các chữ số tạo từ `assets/sprites/digits/{digit}.png` (chiều cao $36\text{ px}$, số `1` rộng $16\text{ px}$, các số khác rộng $24\text{ px}$).
+- **Thuật toán căn giữa tự động cho điểm số 1, 2, 3... chữ số**:
+  1. Khi `score` thay đổi (ví dụ: `0`, `14`, `108`), chuyển thành chuỗi các ký tự số.
+  2. Tính tổng chiều rộng của toàn bộ chuỗi số:
+     $$\text{total\_width} = \sum_{i=1}^{k} \text{width}(\text{digit}_i)$$
+  3. Xác định tọa độ $X$ bắt đầu bên trái:
+     $$X_{\text{start}} = \frac{\text{SCREEN\_WIDTH} - \text{total\_width}}{2.0}$$
+  4. Lần lượt định vị tâm của từng sprite số từ trái qua phải:
+     $$X_{\text{digit}} = X_{\text{current}} + \frac{\text{width}(\text{digit})}{2.0}, \quad Y_{\text{digit}} = \text{SCREEN\_HEIGHT} - 60.0$$
+     $$X_{\text{current}} = X_{\text{current}} + \text{width}(\text{digit})$$
+  5. Kết quả: Điểm số luôn luôn nằm chính giữa màn hình thế giới ảo theo trục dọc ($X = 144.0$) một cách hoàn hảo, bất kể số lượng chữ số tăng lên bao nhiêu.
 
-### 5.3. Cơ Chế Custom Skin & Auto-Fit Kích Thước
-- **Skin Robin Thiên Thần (`angel_robin`)**:
-  - Nguồn: Ảnh người dùng tải lên ($1023 \times 512\text{ px}$).
-  - Tối ưu hóa: Thu nhỏ về $64 \times 32\text{ px}$ (tỷ lệ $2:1$) với thuật toán downsampling chất lượng cao, giữ nguyên độ trong suốt RGBA.
-  - Sải cánh $64\text{ px}$, chiều cao $32\text{ px}$ lọt vừa vặn qua khoảng hở ống nước ($110 - 150\text{ px}$).
-- **Hitbox Bất Biến (Fair Play)**:
-  - Bất kể kích thước texture ($34 \times 24$ hay $64 \times 32$), `Bird.hit_box` luôn cố định:
-    $$\text{Hitbox} = [(-17, -12), (17, -12), (17, 12), (-17, 12)]$$
+### 5.3. Cơ Chế Custom Skin Render Nguyên Bản & Căn Chỉnh Hitbox
+- **Giữ nguyên file texture gốc không resize**:
+  - File texture người dùng tải lên ($1023 \times 512\text{ px}$ RGBA) được lưu trực tiếp vào `assets/skins/custom_robin.png` mà **không bị resize, nén hay cắt xén** bằng Pillow, đảm bảo nguyên vẹn 100% độ sắc nét và chi tiết gốc.
+- **Render thẳng texture đè lên hitbox**:
+  - `Bird` sprite nạp trực tiếp texture này.
+  - Vị trí hitbox chuẩn $34 \times 24\text{ px}$ được căn chỉnh nằm chính giữa tâm của texture (`center_x`, `center_y`), bao trọn phần khuôn mặt và thân của nhân vật:
+    $$\text{Hitbox} = [(-17.0, -12.0), (17.0, -12.0), (17.0, 12.0), (-17.0, 12.0)]$$
 - **Cấu hình trong `DEFAULT_SKINS`**:
   ```python
   Skin(
-      id="angel_robin",
-      name="Robin Thiên Thần",
+      id="custom_robin",
+      name="Robin Thiên Thần (Custom)",
       price=0,
       unlock_type="default",
       unlock_value=0,
-      sprite_path=str(ASSETS_DIR / "skins" / "angel_robin.png"),
-      description="Skin tùy chỉnh thử nghiệm: Thiên thần Robin sải cánh.",
+      sprite_path=str(ASSETS_DIR / "skins" / "custom_robin.png"),
+      description="Skin tùy chỉnh nguyên bản: Robin Thiên Thần đè lên hitbox trung tâm.",
   )
   ```
+- **Hỗ trợ tỷ lệ hiển thị trong Game (Display Scale)**:
+  - Để hỗ trợ linh hoạt giữa việc muốn xem Robin khổng lồ bay phủ màn hình (scale 1.0) hoặc thu nhỏ vừa mắt (scale tùy chỉnh), hệ thống cho phép `Skin` có trường `display_scale: float = 1.0` (hoặc cấu hình scale hiển thị trong game). Khi đó hitbox vẫn bất biến $34 \times 24$ ở tâm.
 
 ### 5.4. Tinh chỉnh `cyber_bird` và `golden_bird`
 - Lấy nền tảng sprite pixel art gốc từ Flappy Bird ($34 \times 24\text{ px}$).
