@@ -2,6 +2,7 @@
 import arcade
 
 from ..constants import (
+    ASSETS_DIR,
     BIRD_START_X,
     BIRD_START_Y,
     FIXED_DT,
@@ -21,7 +22,7 @@ class GameView(BaseView):
     def __init__(self) -> None:
         super().__init__()
         # Đối tượng môi trường
-        self.background = arcade.Sprite("assets/sprites/background-day.png")
+        self.background = arcade.Sprite(ASSETS_DIR / "sprites" / "background-day.png")
         self.background.center_x = SCREEN_WIDTH / 2.0
         self.background.center_y = SCREEN_HEIGHT / 2.0
 
@@ -44,7 +45,6 @@ class GameView(BaseView):
         self.coins_earned: int = 0
         self.accumulator: float = 0.0
         self.is_dead: bool = False
-        self.crash_entity: str = ""
 
         # Khởi tạo các đối tượng arcade.Text
         self.score_text = arcade.Text(
@@ -87,7 +87,6 @@ class GameView(BaseView):
         self.coins_earned = 0
         self.accumulator = 0.0
         self.is_dead = False
-        self.crash_entity = ""
         self.score_text.text = "0"
         self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
 
@@ -178,14 +177,16 @@ class GameView(BaseView):
             # Tính điểm khi bay qua ống
             pts = self.pipe_manager.check_score(self.bird.center_x)
             if pts > 0:
+                old_score = self.score
                 self.score += pts
                 self.score_text.text = f"{self.score}"
                 self.flappy_window.audio.play_point()
-                # Cứ 5 điểm nhận 1 coin
-                if self.score % SCORE_PER_COIN == 0:
-                    self.coins_earned += 1
-                    self.flappy_window.save_data.coins += 1
-                    self.flappy_window.save_data.total_coins_collected += 1
+                # Cứ 5 điểm nhận 1 coin (tính theo mốc vượt qua để không sót khi pts > 1)
+                new_coins = (self.score // SCORE_PER_COIN) - (old_score // SCORE_PER_COIN)
+                if new_coins > 0:
+                    self.coins_earned += new_coins
+                    self.flappy_window.save_data.coins += new_coins
+                    self.flappy_window.save_data.total_coins_collected += new_coins
                     self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
 
             # Kiểm tra trần nhà
@@ -211,7 +212,6 @@ class GameView(BaseView):
 
     def die(self, crash_entity: str) -> None:
         self.is_dead = True
-        self.crash_entity = crash_entity
         self.flappy_window.audio.play_hit()
         if crash_entity == "pipe":
             self.flappy_window.audio.play_die()
@@ -220,7 +220,10 @@ class GameView(BaseView):
         if self.score > self.flappy_window.save_data.high_score:
             self.flappy_window.save_data.high_score = self.score
 
-        # Lưu toàn bộ tiến trình (coin, highscore) ngay khi chết
+        # Tự động kiểm tra và mở khóa thành tựu (cyber_bird / golden_bird) trước khi lưu
+        self.flappy_window.skin_manager.check_achievements(self.flappy_window.save_data)
+
+        # Lưu toàn bộ tiến trình (coin, highscore, unlocked_skins) ngay khi chết
         self.flappy_window.save_progress()
 
     def trigger_game_over(self) -> None:

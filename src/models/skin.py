@@ -2,6 +2,8 @@
 from dataclasses import dataclass
 from typing import Literal
 
+from ..constants import ASSETS_DIR
+
 UnlockType = Literal["default", "coin", "highscore", "total_coins"]
 
 
@@ -15,10 +17,6 @@ class Skin:
     sprite_path: str
     description: str = ""
 
-    @property
-    def is_free(self) -> bool:
-        return self.unlock_type == "default"
-
 
 # Danh mục 5 skin khởi tạo
 DEFAULT_SKINS: list[Skin] = [
@@ -28,7 +26,7 @@ DEFAULT_SKINS: list[Skin] = [
         price=0,
         unlock_type="default",
         unlock_value=0,
-        sprite_path="assets/skins/classic.png",
+        sprite_path=str(ASSETS_DIR / "skins" / "classic.png"),
         description="Chú chim màu vàng huyền thoại.",
     ),
     Skin(
@@ -37,7 +35,7 @@ DEFAULT_SKINS: list[Skin] = [
         price=10,
         unlock_type="coin",
         unlock_value=10,
-        sprite_path="assets/skins/blue_bird.png",
+        sprite_path=str(ASSETS_DIR / "skins" / "blue_bird.png"),
         description="Chú chim xanh nhanh nhẹn (10 Coins).",
     ),
     Skin(
@@ -46,7 +44,7 @@ DEFAULT_SKINS: list[Skin] = [
         price=25,
         unlock_type="coin",
         unlock_value=25,
-        sprite_path="assets/skins/red_bird.png",
+        sprite_path=str(ASSETS_DIR / "skins" / "red_bird.png"),
         description="Chú chim đỏ dũng mãnh (25 Coins).",
     ),
     Skin(
@@ -55,7 +53,7 @@ DEFAULT_SKINS: list[Skin] = [
         price=0,
         unlock_type="highscore",
         unlock_value=20,
-        sprite_path="assets/skins/cyber_bird.png",
+        sprite_path=str(ASSETS_DIR / "skins" / "cyber_bird.png"),
         description="Mở khóa khi đạt High Score >= 20.",
     ),
     Skin(
@@ -64,7 +62,7 @@ DEFAULT_SKINS: list[Skin] = [
         price=0,
         unlock_type="total_coins",
         unlock_value=50,
-        sprite_path="assets/skins/golden_bird.png",
+        sprite_path=str(ASSETS_DIR / "skins" / "golden_bird.png"),
         description="Mở khóa khi tích lũy tổng cộng >= 50 Coins.",
     ),
 ]

@@ -1,13 +1,13 @@
 """Thực thể Ống nước (Pipe) và Quản lý cặp ống (PipeManager)."""
 import random
 from dataclasses import dataclass
-from typing import Optional
+from pathlib import Path
 
 import arcade
 
 from ..constants import (
+    ASSETS_DIR,
     FLOOR_HEIGHT,
-    PIPE_HEIGHT,
     PIPE_HORIZONTAL_SPACING,
     PIPE_WIDTH,
     SCREEN_HEIGHT,
@@ -16,7 +16,11 @@ from ..constants import (
 
 
 class Pipe(arcade.Sprite):
-    def __init__(self, is_upper: bool, texture_path: str = "assets/sprites/pipe-green.png") -> None:
+    def __init__(
+        self,
+        is_upper: bool,
+        texture_path: str | Path | arcade.Texture = ASSETS_DIR / "sprites" / "pipe-green.png",
+    ) -> None:
         super().__init__(path_or_texture=texture_path)
         self.is_upper = is_upper
         if is_upper:
@@ -40,8 +44,9 @@ class PipePair:
 
 
 class PipeManager:
-    def __init__(self, texture_path: str = "assets/sprites/pipe-green.png") -> None:
-        self.texture_path = texture_path
+    def __init__(self, texture_path: str | Path = ASSETS_DIR / "sprites" / "pipe-green.png") -> None:
+        self.texture_path = Path(texture_path)
+        self.texture: arcade.Texture = arcade.load_texture(self.texture_path)
         self.sprite_list = arcade.SpriteList()
         self.pairs: list[PipePair] = []
 
@@ -61,11 +66,11 @@ class PipeManager:
 
         spawn_x = SCREEN_WIDTH + PIPE_WIDTH / 2.0
 
-        upper = Pipe(is_upper=True, texture_path=self.texture_path)
+        upper = Pipe(is_upper=True, texture_path=self.texture)
         upper.center_x = spawn_x
         upper.bottom = gap_y + gap_size / 2.0
 
-        lower = Pipe(is_upper=False, texture_path=self.texture_path)
+        lower = Pipe(is_upper=False, texture_path=self.texture)
         lower.center_x = spawn_x
         lower.top = gap_y - gap_size / 2.0
 

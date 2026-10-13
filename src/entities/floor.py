@@ -1,11 +1,11 @@
 """Thực thể Mặt đất (Floor) cuộn ngang tuần hoàn mượt mà."""
 import arcade
 
-from ..constants import FLOOR_HEIGHT, SCREEN_WIDTH
+from ..constants import ASSETS_DIR, FLOOR_HEIGHT
 
 
 class Floor(arcade.Sprite):
-    def __init__(self, texture_path: str = "assets/sprites/base.png") -> None:
+    def __init__(self, texture_path: str = str(ASSETS_DIR / "sprites" / "base.png")) -> None:
         super().__init__(path_or_texture=texture_path)
         # base.png có kích cỡ 336x112, họa tiết lặp chu kỳ mỗi 16 px
         self.pattern_repeat: float = 16.0

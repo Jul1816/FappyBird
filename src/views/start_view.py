@@ -4,6 +4,7 @@ import math
 import arcade
 
 from ..constants import (
+    ASSETS_DIR,
     BIRD_START_X,
     BIRD_START_Y,
     SCREEN_HEIGHT,
@@ -17,7 +18,7 @@ from .base_view import BaseView
 class StartView(BaseView):
     def __init__(self) -> None:
         super().__init__()
-        self.background = arcade.Sprite("assets/sprites/background-day.png")
+        self.background = arcade.Sprite(ASSETS_DIR / "sprites" / "background-day.png")
         self.background.center_x = SCREEN_WIDTH / 2.0
         self.background.center_y = SCREEN_HEIGHT / 2.0
 
@@ -154,7 +155,7 @@ class StartView(BaseView):
     def open_shop(self) -> None:
         from .shop_view import ShopView
 
-        shop_view = ShopView(return_view="start")
+        shop_view = ShopView(return_view="start", previous_view=self)
         self.window.show_view(shop_view)
 
     def on_draw(self) -> None:

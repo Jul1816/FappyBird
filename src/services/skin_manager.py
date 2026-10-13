@@ -16,18 +16,14 @@ class SkinManager:
         return next((s for s in self.skins if s.id == skin_id), None)
 
     def is_unlocked(self, skin: Skin, save_data: SaveData) -> bool:
-        """Kiểm tra skin đã được mở khóa chưa."""
+        """Kiểm tra skin đã được mở khóa chưa (hàm thuần khiết, không mutate save_data)."""
         if skin.id in save_data.unlocked_skins:
             return True
         if skin.unlock_type == "default":
             return True
         if skin.unlock_type == "highscore" and save_data.high_score >= skin.unlock_value:
-            if skin.id not in save_data.unlocked_skins:
-                save_data.unlocked_skins.append(skin.id)
             return True
         if skin.unlock_type == "total_coins" and save_data.total_coins_collected >= skin.unlock_value:
-            if skin.id not in save_data.unlocked_skins:
-                save_data.unlocked_skins.append(skin.id)
             return True
         return False
 
@@ -36,6 +32,7 @@ class SkinManager:
         newly_unlocked: list[Skin] = []
         for skin in self.skins:
             if skin.id not in save_data.unlocked_skins and self.is_unlocked(skin, save_data):
+                save_data.unlocked_skins.append(skin.id)
                 newly_unlocked.append(skin)
         return newly_unlocked
 

@@ -1,9 +1,10 @@
 """ShopView: Màn hình Shop duyệt skin, xem trước hình ảnh, mua và trang bị."""
 import math
+from typing import Optional
 
 import arcade
 
-from ..constants import SCREEN_HEIGHT, SCREEN_WIDTH
+from ..constants import ASSETS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH
 from ..entities.floor import Floor
 from ..models.skin import DEFAULT_SKINS, Skin
 from ..services.skin_manager import SkinManager
@@ -11,15 +12,16 @@ from .base_view import BaseView
 
 
 class ShopView(BaseView):
-    def __init__(self, return_view: str = "start") -> None:
+    def __init__(self, return_view: str = "start", previous_view: Optional[BaseView] = None) -> None:
         super().__init__()
         self.return_view = return_view
+        self.previous_view: Optional[BaseView] = previous_view
         self.skin_manager = SkinManager(DEFAULT_SKINS)
         self.skins: list[Skin] = self.skin_manager.get_all_skins()
         self.selected_index: int = 0
 
         # Background & Floor SpriteList
-        self.background = arcade.Sprite("assets/sprites/background-night.png")
+        self.background = arcade.Sprite(ASSETS_DIR / "sprites" / "background-night.png")
         self.background.center_x = SCREEN_WIDTH / 2.0
         self.background.center_y = SCREEN_HEIGHT / 2.0
         self.floor = Floor()
@@ -34,7 +36,7 @@ class ShopView(BaseView):
             try:
                 self.skin_textures[s.id] = arcade.load_texture(s.sprite_path)
             except Exception:
-                self.skin_textures[s.id] = arcade.load_texture("assets/skins/classic.png")
+                self.skin_textures[s.id] = arcade.load_texture(ASSETS_DIR / "skins" / "classic.png")
 
         # Sprite xem trước trong Shop
         self.preview_sprite = arcade.Sprite()
@@ -174,6 +176,9 @@ class ShopView(BaseView):
     def on_show_view(self) -> None:
         super().on_show_view()
         self.time = 0.0
+        if self.window and hasattr(self.window, "skin_manager"):
+            self.skin_manager = self.flappy_window.skin_manager
+            self.skins = self.skin_manager.get_all_skins()
         # Đặt con trỏ vào skin đang trang bị
         equipped_id = self.flappy_window.save_data.equipped_skin
         for idx, s in enumerate(self.skins):
@@ -276,6 +281,9 @@ class ShopView(BaseView):
 
     def go_back(self) -> None:
         """Quay về màn hình trước."""
+        if self.previous_view is not None:
+            self.window.show_view(self.previous_view)
+            return
         if self.return_view == "game_over":
             from .game_over_view import GameOverView
 

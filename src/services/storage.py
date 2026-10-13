@@ -21,10 +21,10 @@ class StorageService:
             return SaveData()
 
         try:
-            with open(self.save_path, "r", encoding="utf-8") as f:
+            with open(self.save_path, "r", encoding="utf-8-sig") as f:
                 data = json.load(f)
             return SaveData.from_dict(data)
-        except (json.JSONDecodeError, OSError, ValueError) as e:
+        except (json.JSONDecodeError, OSError, ValueError, TypeError) as e:
             logger.warning("Không thể đọc file save_data.json (%s). Sử dụng dữ liệu mặc định.", e)
             return SaveData()
 

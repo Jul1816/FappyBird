@@ -2,7 +2,7 @@
 import arcade
 
 from ..constants import (
-    FLOOR_HEIGHT,
+    ASSETS_DIR,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
 )
@@ -16,7 +16,7 @@ class GameOverView(BaseView):
         self.score = score
         self.coins_earned = coins_earned
 
-        self.background = arcade.Sprite("assets/sprites/background-day.png")
+        self.background = arcade.Sprite(ASSETS_DIR / "sprites" / "background-day.png")
         self.background.center_x = SCREEN_WIDTH / 2.0
         self.background.center_y = SCREEN_HEIGHT / 2.0
         self.floor = Floor()
@@ -158,7 +158,7 @@ class GameOverView(BaseView):
     def open_shop(self) -> None:
         from .shop_view import ShopView
 
-        self.window.show_view(ShopView(return_view="game_over"))
+        self.window.show_view(ShopView(return_view="game_over", previous_view=self))
 
     def on_draw(self) -> None:
         super().on_draw()

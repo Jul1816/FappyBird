@@ -1,5 +1,6 @@
 """Công cụ tự động sinh sprite pixel art placeholder và chuẩn bị âm thanh."""
 import math
+import os
 import shutil
 import struct
 import wave
@@ -171,9 +172,10 @@ def generate_synthesized_wav(filepath: Path, duration: float = 0.15, freq: float
 
 
 def ensure_audio_files(audio_dir: Path) -> None:
-    """Sao chép audio từ E:\\stolen\\FlapPyBird nếu có, hoặc tự tổng hợp wav fallback."""
+    """Sao chép audio từ thư mục tham khảo (nếu có FLAPPY_REF_AUDIO_DIR), hoặc tự tổng hợp wav fallback."""
     audio_dir.mkdir(parents=True, exist_ok=True)
-    stolen_audio_dir = Path(r"E:\stolen\FlapPyBird\assets\audio")
+    ref_audio_env = os.environ.get("FLAPPY_REF_AUDIO_DIR")
+    ref_audio_dir = Path(ref_audio_env) if ref_audio_env else None
     sfx_specs = {
         "wing.wav": 480.0,
         "hit.wav": 160.0,
@@ -187,10 +189,9 @@ def ensure_audio_files(audio_dir: Path) -> None:
         if dest.exists() and dest.stat().st_size > 0:
             continue
 
-        # Thử copy từ source tham khảo
-        src_candidate = stolen_audio_dir / sfx_name
-        if src_candidate.exists():
-            shutil.copy2(src_candidate, dest)
+        # Thử copy từ source tham khảo nếu được cấu hình
+        if ref_audio_dir is not None and (ref_audio_dir / sfx_name).exists():
+            shutil.copy2(ref_audio_dir / sfx_name, dest)
         else:
             # Fallback tạo tiếng bíp điện tử chuẩn
             generate_synthesized_wav(dest, duration=0.18, freq=freq)

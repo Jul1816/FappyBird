@@ -21,6 +21,8 @@ data/
 # Developer tasks, specifications & test suites (minimal runtime repo)
 tests/
 tasks/
+docs/
+.superpowers/
 SPEC.md
 
 # IDEs & OS files

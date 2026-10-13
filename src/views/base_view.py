@@ -26,12 +26,16 @@ class BaseView(arcade.View):
             self._camera = Camera2D(window=self.window)
         self.update_camera()
 
-    def update_camera(self) -> None:
+    def update_camera(self, width: int | None = None, height: int | None = None) -> None:
         """Tính toán tỷ lệ Letterbox/Pillarbox và gán viewport ảo 288x512."""
         if not self._camera:
             return
 
-        win_w, win_h = self.window.width, self.window.height
+        win_w = width if width is not None else self.window.width
+        win_h = height if height is not None else self.window.height
+        if win_w <= 0 or win_h <= 0:
+            return
+
         scale = min(win_w / SCREEN_WIDTH, win_h / SCREEN_HEIGHT)
         vp_w = max(1, int(SCREEN_WIDTH * scale))
         vp_h = max(1, int(SCREEN_HEIGHT * scale))
@@ -53,7 +57,7 @@ class BaseView(arcade.View):
     def on_resize(self, width: int, height: int) -> None:
         """Tự động tính lại letterbox khi cửa sổ thay đổi kích thước."""
         super().on_resize(width, height)
-        self.update_camera()
+        self.update_camera(width, height)
 
     def unproject_mouse(self, x: float, y: float) -> Tuple[float, float]:
         """Ánh xạ tọa độ chuột từ pixel màn hình thực sang tọa độ thế giới ảo 288x512."""
@@ -63,8 +67,10 @@ class BaseView(arcade.View):
         return vec.x, vec.y
 
     def on_draw(self) -> None:
-        """Xóa viền đen và kích hoạt camera chiếu thế giới ảo."""
-        self.clear(color=(15, 15, 18, 255))
+        """Xóa toàn bộ viền màn hình màu đen và kích hoạt camera chiếu thế giới ảo."""
+        self.window.ctx.scissor = None
+        self.window.ctx.viewport = (0, 0, self.window.width, self.window.height)
+        self.clear(color=(0, 0, 0, 255))
         if self._camera:
             self._camera.use()
 
