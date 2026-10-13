@@ -99,13 +99,23 @@ class FlappyWindow(arcade.Window):
      $$X_{\text{current}} = X_{\text{current}} + \text{width}(\text{digit})$$
   5. Kết quả: Điểm số luôn luôn nằm chính giữa màn hình thế giới ảo theo trục dọc ($X = 144.0$) một cách hoàn hảo, bất kể số lượng chữ số tăng lên bao nhiêu.
 
-### 5.3. Cơ Chế Custom Skin Render Nguyên Bản & Căn Chỉnh Hitbox
-- **Giữ nguyên file texture gốc không resize**:
-  - File texture người dùng tải lên ($1023 \times 512\text{ px}$ RGBA) được lưu trực tiếp vào `assets/skins/custom_robin.png` mà **không bị resize, nén hay cắt xén** bằng Pillow, đảm bảo nguyên vẹn 100% độ sắc nét và chi tiết gốc.
-- **Render thẳng texture đè lên hitbox**:
-  - `Bird` sprite nạp trực tiếp texture này.
-  - Vị trí hitbox chuẩn $34 \times 24\text{ px}$ được căn chỉnh nằm chính giữa tâm của texture (`center_x`, `center_y`), bao trọn phần khuôn mặt và thân của nhân vật:
+### 5.3. Cơ Chế Custom Skin Chuẩn Hóa Theo Chiều Cao Hitbox
+- **Nguyên tắc bảo toàn độ phân giải file**:
+  - File texture trên đĩa (kể cả file ngoài người dùng thêm vào như `custom_robin.png` kích thước $1023 \times 512\text{ px}$) được giữ nguyên vẹn 100% độ phân giải gốc, **không qua resize hay nén ảnh bằng Pillow**.
+- **Công thức Auto-Fit chiều cao hiển thị bằng đúng chiều cao Hitbox thực tế**:
+  - Trong `Bird` entity, khi nhận bất kỳ texture nào có kích thước bất kỳ ($32\times32$, $64\times64$, $48\times32$, $1:1$, $2:1$, $1023\times512$), hệ thống tự động tính tỷ lệ hiển thị `scale`:
+    $$\text{scale} = \frac{\text{STANDARD\_HITBOX\_HEIGHT}}{\text{texture.height}} = \frac{24.0}{\text{texture.height}}$$
+  - **Kích thước hiển thị trên màn hình**:
+    + Chiều cao hiển thị: $\text{rendered\_height} = \text{texture.height} \times \text{scale} = 24.0\text{ px}$ (bằng khít chiều cao hitbox thực tế).
+    + Chiều rộng hiển thị: $\text{rendered\_width} = \text{texture.width} \times \text{scale} = \text{texture.width} \times \frac{24.0}{\text{texture.height}}$ (bảo toàn tỷ lệ khung hình gốc).
+    + Ví dụ với ảnh Robin $1023 \times 512$: $\text{scale} = \frac{24.0}{512} \approx 0.046875 \implies \text{rendered\_height} = 24.0\text{ px}, \text{rendered\_width} \approx 48.0\text{ px}$.
+- **Căn giữa Hitbox hoàn hảo trong Skin**:
+  - Hitbox chuẩn cố định $34 \times 24\text{ px}$ được đặt chính giữa tâm của texture (`center_x, center_y`):
     $$\text{Hitbox} = [(-17.0, -12.0), (17.0, -12.0), (17.0, 12.0), (-17.0, 12.0)]$$
+  - Viền trên và viền dưới của hitbox khớp khít với đỉnh và đáy của skin ($Y \in [-12, +12]$).
+  - Trọng tâm và khuôn mặt nhân vật nằm trọn vẹn trong vùng hitbox va chạm.
+- **Áp dụng đồng bộ cho `ShopView`**:
+  - Trong màn hình xem trước Shop, sprite preview tự động tính theo tỷ lệ chuẩn `base_scale = 24.0 / texture.height` nhân với hệ số phóng đại preview ($1.5 \times$), giúp mọi skin từ $32\times32$ đến $1023\times512$ đều hiển thị vừa vặn, đẹp mắt trong khung giao diện.
 - **Cấu hình trong `DEFAULT_SKINS`**:
   ```python
   Skin(
@@ -115,11 +125,9 @@ class FlappyWindow(arcade.Window):
       unlock_type="default",
       unlock_value=0,
       sprite_path=str(ASSETS_DIR / "skins" / "custom_robin.png"),
-      description="Skin tùy chỉnh nguyên bản: Robin Thiên Thần đè lên hitbox trung tâm.",
+      description="Skin tùy chỉnh thử nghiệm: Robin Thiên Thần thu nhỏ khớp chuẩn chiều cao hitbox 24px.",
   )
   ```
-- **Hỗ trợ tỷ lệ hiển thị trong Game (Display Scale)**:
-  - Để hỗ trợ linh hoạt giữa việc muốn xem Robin khổng lồ bay phủ màn hình (scale 1.0) hoặc thu nhỏ vừa mắt (scale tùy chỉnh), hệ thống cho phép `Skin` có trường `display_scale: float = 1.0` (hoặc cấu hình scale hiển thị trong game). Khi đó hitbox vẫn bất biến $34 \times 24$ ở tâm.
 
 ### 5.4. Tinh chỉnh `cyber_bird` và `golden_bird`
 - Lấy nền tảng sprite pixel art gốc từ Flappy Bird ($34 \times 24\text{ px}$).
