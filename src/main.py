@@ -2,6 +2,8 @@
 from typing import Optional
 
 import arcade
+from arcade.texture_atlas.atlas_default import DefaultTextureAtlas
+import pyglet.gl as gl
 
 from .constants import ASSETS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH
 from .models.save_data import SaveData
@@ -9,6 +11,21 @@ from .services.audio import AudioService
 from .services.skin_manager import SkinManager
 from .services.storage import StorageService
 from .tools.generate_placeholders import ensure_assets_exist
+
+# Cấu hình Nearest-Neighbor toàn cục cho mọi SpriteList
+arcade.SpriteList.DEFAULT_TEXTURE_FILTER = (gl.GL_NEAREST, gl.GL_NEAREST)
+
+# Patch DefaultTextureAtlas.resize để duy trì GL_NEAREST khi atlas mở rộng
+_orig_atlas_resize = DefaultTextureAtlas.resize
+
+
+def _nearest_atlas_resize(self, size, force=False):
+    _orig_atlas_resize(self, size, force=force)
+    if hasattr(self, "_texture") and self._texture is not None:
+        self._texture.filter = (gl.GL_NEAREST, gl.GL_NEAREST)
+
+
+DefaultTextureAtlas.resize = _nearest_atlas_resize
 
 
 class FlappyWindow(arcade.Window):
@@ -24,6 +41,10 @@ class FlappyWindow(arcade.Window):
             antialiasing=False,  # Pixel art không làm mờ viền
             visible=visible,
         )
+
+        # Cấu hình bộ lọc Nearest-Neighbor cho atlas chính của context
+        if hasattr(self.ctx, "default_atlas") and self.ctx.default_atlas:
+            self.ctx.default_atlas.texture.filter = (gl.GL_NEAREST, gl.GL_NEAREST)
 
         # Dịch vụ dữ liệu & âm thanh
         self.storage = storage or StorageService()
