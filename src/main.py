@@ -14,6 +14,7 @@ from .models.save_data import SaveData
 from .services.audio import AudioService
 from .services.skin_manager import SkinManager
 from .services.storage import StorageService
+from .services.trail_manager import TrailManager
 from .tools.generate_placeholders import ensure_assets_exist
 
 # Cấu hình Nearest-Neighbor toàn cục cho mọi SpriteList
@@ -56,6 +57,7 @@ class FlappyWindow(arcade.Window):
         self.save_data: SaveData = self.storage.load()
         self.audio = AudioService()
         self.skin_manager = SkinManager()
+        self.trail_manager = TrailManager()
 
         # Cache texture của skin đang trang bị
         self.current_skin_texture: Optional[arcade.Texture] = None

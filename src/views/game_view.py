@@ -16,6 +16,7 @@ from ..entities.bird import Bird
 from ..entities.floor import Floor
 from ..entities.pipe import PipeManager
 from ..entities.score_display import ScoreDisplay
+from ..entities.trail import TrailEmitter
 from ..services.difficulty import DifficultyService
 from .base_view import BaseView
 
@@ -37,6 +38,7 @@ class GameView(BaseView):
 
         self.pipe_manager = PipeManager()
         self.difficulty = DifficultyService()
+        self.trail_emitter = TrailEmitter()
 
         # Đối tượng chim
         self.bird: Bird | None = None
@@ -108,8 +110,25 @@ class GameView(BaseView):
         self.pipe_manager.reset()
         self.difficulty.reset()
 
-        # Cho chim vỗ cánh cú đầu tiên
+        # Nạp Trail đang trang bị
+        equipped_trail_id = getattr(self.flappy_window.save_data, "equipped_trail", "none")
+        trail_obj = (
+            self.flappy_window.trail_manager.get_trail(equipped_trail_id)
+            if hasattr(self.flappy_window, "trail_manager")
+            else None
+        )
+        self.trail_emitter.set_trail(trail_obj)
+
+        # Cho chim vỗ cánh cú đầu tiên và phát burst vệt bay
         self.bird.flap()
+        self.trail_emitter.burst(
+            self.bird.center_x,
+            self.bird.center_y,
+            self.bird.angle,
+            self.bird.texture,
+            self.bird.scale,
+            self.difficulty.current_speed,
+        )
         self.flappy_window.audio.play_wing()
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
@@ -119,6 +138,15 @@ class GameView(BaseView):
         if symbol in (arcade.key.SPACE, arcade.key.UP):
             if not self.is_dead and self.bird:
                 self.bird.flap()
+                world_speed = self.difficulty.current_speed if hasattr(self, "difficulty") else 180.0
+                self.trail_emitter.burst(
+                    self.bird.center_x,
+                    self.bird.center_y,
+                    self.bird.angle,
+                    self.bird.texture,
+                    self.bird.scale,
+                    world_speed,
+                )
                 self.flappy_window.audio.play_wing()
 
         # 2. Phím tắt Debug Mode (DX-2)
@@ -148,6 +176,15 @@ class GameView(BaseView):
         if button == arcade.MOUSE_BUTTON_LEFT:
             if not self.is_dead and self.bird:
                 self.bird.flap()
+                world_speed = self.difficulty.current_speed if hasattr(self, "difficulty") else 180.0
+                self.trail_emitter.burst(
+                    self.bird.center_x,
+                    self.bird.center_y,
+                    self.bird.angle,
+                    self.bird.texture,
+                    self.bird.scale,
+                    world_speed,
+                )
                 self.flappy_window.audio.play_wing()
 
     def on_update(self, delta_time: float) -> None:
@@ -171,6 +208,17 @@ class GameView(BaseView):
 
             # Cập nhật chim
             self.bird.update_physics(dt)
+
+            # Cập nhật vệt bay
+            self.trail_emitter.update(
+                dt,
+                world_speed,
+                self.bird.center_x,
+                self.bird.center_y,
+                self.bird.angle,
+                self.bird.texture,
+                self.bird.scale,
+            )
 
             # Cập nhật sàn và ống
             self.floor.update_scroll(dt, world_speed)
@@ -211,6 +259,15 @@ class GameView(BaseView):
         else:
             # Khi đã chết, chim tiếp tục rơi cắm đầu xuống đất trước khi hiện bảng Game Over
             self.bird.update_physics(dt)
+            self.trail_emitter.update(
+                dt,
+                0.0,
+                self.bird.center_x,
+                self.bird.center_y,
+                self.bird.angle,
+                None,
+                self.bird.scale,
+            )
             if self.bird.bottom <= FLOOR_HEIGHT:
                 self.bird.bottom = FLOOR_HEIGHT
                 self.trigger_game_over()
@@ -225,10 +282,12 @@ class GameView(BaseView):
         if self.score > self.flappy_window.save_data.high_score:
             self.flappy_window.save_data.high_score = self.score
 
-        # Tự động kiểm tra và mở khóa thành tựu (cyber / fiery / royal) trước khi lưu
+        # Tự động kiểm tra và mở khóa thành tựu skin & trail trước khi lưu
         self.flappy_window.skin_manager.check_achievements(self.flappy_window.save_data)
+        if hasattr(self.flappy_window, "trail_manager"):
+            self.flappy_window.trail_manager.check_achievements(self.flappy_window.save_data)
 
-        # Lưu toàn bộ tiến trình (coin, highscore, unlocked_skins) ngay khi chết
+        # Lưu toàn bộ tiến trình (coin, highscore, unlocked_skins, unlocked_trails) ngay khi chết
         self.flappy_window.save_progress()
 
     def trigger_game_over(self) -> None:
@@ -247,10 +306,13 @@ class GameView(BaseView):
         # 2. Vẽ ống nước (SpriteList)
         self.pipe_manager.sprite_list.draw()
 
-        # 3. Vẽ sàn (SpriteList)
+        # 3. Vẽ vệt bay (TrailEmitter)
+        self.trail_emitter.draw()
+
+        # 4. Vẽ sàn (SpriteList)
         self.floor_list.draw()
 
-        # 4. Vẽ chim (SpriteList)
+        # 5. Vẽ chim (SpriteList)
         self.bird_list.draw()
 
         # 5. Vẽ UI (Điểm số retro sprite ở giữa trên, Coin ở góc phải trên)
