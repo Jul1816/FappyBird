@@ -218,11 +218,13 @@ class TrailEmitter:
             return
 
         self.emit_timer += dt
-        if self.emit_timer >= self.emit_interval:
-            self.emit_timer = 0.0
+        interval = max(0.001, self.emit_interval)
+        drift_vx = -0.55 * world_speed
+
+        while self.emit_timer >= interval:
+            self.emit_timer -= interval
             spawn_x = bird_x - 14.0
             spawn_y = bird_y + random.uniform(-3.0, 3.0)
-            drift_vx = -0.55 * world_speed
 
             if self.current_trail.trail_type == "particle" and self.particle_texture:
                 vx = drift_vx + random.uniform(-8.0, 8.0)

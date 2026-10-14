@@ -322,9 +322,9 @@ class ShopView(BaseView):
 
         # Cập nhật vệt bay xem trước với vận tốc trôi nhẹ sang trái tạo dải dài
         if self.trail_emitter.is_active:
+            dt = min(0.05, delta_time)
             self.trail_emitter.update(
-                delta_time,
-                bird_pos=(self.preview_sprite.center_x, self.preview_sprite.center_y),
+                dt,
                 bird_sprite=self.preview_sprite,
                 world_speed=80.0,
             )
