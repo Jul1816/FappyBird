@@ -29,6 +29,8 @@ tasks/
 docs/
 .superpowers/
 SPEC.md
+SPEC-crisp-pixel-art.md
+SPEC-duck-skins.md
 
 # IDEs & OS files
 .vscode/
