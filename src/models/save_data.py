@@ -5,6 +5,8 @@ from typing import Any
 VALID_SKIN_IDS = {"yellow", "electric", "cyber", "royal", "fiery", "custom_robin"}
 DEPRECATED_SKIN_IDS = {"classic", "blue_bird", "red_bird", "cyber_bird", "golden_bird"}
 
+VALID_TRAIL_IDS = {"none", "custom", "ghost", "star", "heart", "fire", "shadow"}
+
 
 @dataclass
 class SaveData:
@@ -13,6 +15,8 @@ class SaveData:
     total_coins_collected: int = 0
     equipped_skin: str = "yellow"
     unlocked_skins: list[str] = field(default_factory=lambda: ["yellow"])
+    equipped_trail: str = "none"
+    unlocked_trails: list[str] = field(default_factory=lambda: ["none", "custom"])
 
     @staticmethod
     def _safe_int(value: Any, default: int = 0) -> int:
@@ -30,6 +34,8 @@ class SaveData:
             "total_coins_collected": max(0, self._safe_int(self.total_coins_collected, 0)),
             "equipped_skin": str(self.equipped_skin),
             "unlocked_skins": list(dict.fromkeys(self.unlocked_skins)),
+            "equipped_trail": str(self.equipped_trail),
+            "unlocked_trails": list(dict.fromkeys(self.unlocked_trails)),
         }
 
     @classmethod
@@ -40,6 +46,8 @@ class SaveData:
         coins = max(0, cls._safe_int(data.get("coins", 0), 0))
         high_score = max(0, cls._safe_int(data.get("high_score", 0), 0))
         total_coins = max(0, cls._safe_int(data.get("total_coins_collected", 0), 0))
+
+        # 1. Khử trùng & nạp Skin
         equipped_skin = str(data.get("equipped_skin", "yellow") or "yellow")
         if equipped_skin in DEPRECATED_SKIN_IDS:
             equipped_skin = "yellow"
@@ -62,10 +70,34 @@ class SaveData:
         if equipped_skin not in unlocked_skins:
             equipped_skin = "yellow"
 
+        # 2. Khử trùng & nạp Trail
+        equipped_trail = str(data.get("equipped_trail", "none") or "none")
+        raw_unlocked_trails = data.get("unlocked_trails", ["none", "custom"])
+        if not isinstance(raw_unlocked_trails, list):
+            raw_unlocked_trails = ["none", "custom"]
+
+        filtered_trails = []
+        for t in raw_unlocked_trails:
+            if isinstance(t, (str, int)) and not isinstance(t, bool):
+                t_str = str(t)
+                if t_str in VALID_TRAIL_IDS:
+                    filtered_trails.append(t_str)
+
+        unlocked_trails = list(dict.fromkeys(filtered_trails))
+        if "none" not in unlocked_trails:
+            unlocked_trails.insert(0, "none")
+        if "custom" not in unlocked_trails:
+            unlocked_trails.append("custom")
+
+        if equipped_trail not in unlocked_trails:
+            equipped_trail = "none"
+
         return cls(
             coins=coins,
             high_score=high_score,
             total_coins_collected=max(total_coins, coins),
             equipped_skin=equipped_skin,
             unlocked_skins=unlocked_skins,
+            equipped_trail=equipped_trail,
+            unlocked_trails=unlocked_trails,
         )
