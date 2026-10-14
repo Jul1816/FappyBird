@@ -24,6 +24,9 @@ class BaseView(arcade.View):
         """Kích hoạt khi chuyển sang view này."""
         if not self._camera:
             self._camera = Camera2D(window=self.window)
+        if self.window and hasattr(self.window, "ctx") and hasattr(self.window.ctx, "default_atlas") and self.window.ctx.default_atlas:
+            import pyglet.gl as gl
+            self.window.ctx.default_atlas.texture.filter = (gl.GL_NEAREST, gl.GL_NEAREST)
         self.update_camera()
 
     def update_camera(self, width: int | None = None, height: int | None = None) -> None:

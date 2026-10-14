@@ -7,6 +7,7 @@ from ..constants import (
     BIRD_START_Y,
     FIXED_DT,
     FLOOR_HEIGHT,
+    FONT_RETRO_FAMILY,
     SCORE_PER_COIN,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
@@ -14,6 +15,7 @@ from ..constants import (
 from ..entities.bird import Bird
 from ..entities.floor import Floor
 from ..entities.pipe import PipeManager
+from ..entities.score_display import ScoreDisplay
 from ..services.difficulty import DifficultyService
 from .base_view import BaseView
 
@@ -46,7 +48,8 @@ class GameView(BaseView):
         self.accumulator: float = 0.0
         self.is_dead: bool = False
 
-        # Khởi tạo các đối tượng arcade.Text
+        # Khởi tạo hiển thị điểm retro và các đối tượng arcade.Text
+        self.score_display = ScoreDisplay()
         self.score_text = arcade.Text(
             "0",
             SCREEN_WIDTH / 2.0,
@@ -58,22 +61,22 @@ class GameView(BaseView):
             bold=True,
         )
         self.coins_text = arcade.Text(
-            "Coins: 0",
-            SCREEN_WIDTH - 12.0,
-            SCREEN_HEIGHT - 18.0,
+            "COINS: 0",
+            SCREEN_WIDTH - 10.0,
+            SCREEN_HEIGHT - 16.0,
             (255, 215, 0, 255),
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="right",
             anchor_y="center",
-            bold=True,
         )
         self.god_mode_text = arcade.Text(
             "GOD MODE ON",
             10.0,
-            SCREEN_HEIGHT - 18.0,
+            SCREEN_HEIGHT - 16.0,
             arcade.color.GREEN,
-            font_size=10,
-            bold=True,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
         )
 
 
@@ -87,8 +90,9 @@ class GameView(BaseView):
         self.coins_earned = 0
         self.accumulator = 0.0
         self.is_dead = False
+        self.score_display.set_score(0)
         self.score_text.text = "0"
-        self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+        self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
 
         # Khởi tạo chim với texture skin hiện tại
         texture = self.flappy_window.current_skin_texture
@@ -123,7 +127,7 @@ class GameView(BaseView):
             self.flappy_window.save_data.coins += 10
             self.flappy_window.save_data.total_coins_collected += 10
             self.flappy_window.save_progress()
-            self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+            self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
         elif symbol == arcade.key.F2:
             # F2: Bật/tắt vẽ Hitbox đỏ
             self.flappy_window.debug_hitbox = not self.flappy_window.debug_hitbox
@@ -134,7 +138,7 @@ class GameView(BaseView):
             self.flappy_window.save_data.coins += 2
             self.flappy_window.save_data.total_coins_collected += 2
             self.score_text.text = f"{self.score}"
-            self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+            self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
         elif symbol == arcade.key.F4:
             # F4: Bật/tắt God Mode
             self.flappy_window.god_mode = not self.flappy_window.god_mode
@@ -179,6 +183,7 @@ class GameView(BaseView):
             if pts > 0:
                 old_score = self.score
                 self.score += pts
+                self.score_display.set_score(self.score)
                 self.score_text.text = f"{self.score}"
                 self.flappy_window.audio.play_point()
                 # Cứ 5 điểm nhận 1 coin (tính theo mốc vượt qua để không sót khi pts > 1)
@@ -187,7 +192,7 @@ class GameView(BaseView):
                     self.coins_earned += new_coins
                     self.flappy_window.save_data.coins += new_coins
                     self.flappy_window.save_data.total_coins_collected += new_coins
-                    self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+                    self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
 
             # Kiểm tra trần nhà
             if self.bird.top >= SCREEN_HEIGHT:
@@ -220,7 +225,7 @@ class GameView(BaseView):
         if self.score > self.flappy_window.save_data.high_score:
             self.flappy_window.save_data.high_score = self.score
 
-        # Tự động kiểm tra và mở khóa thành tựu (cyber_bird / golden_bird) trước khi lưu
+        # Tự động kiểm tra và mở khóa thành tựu (cyber / fiery / royal) trước khi lưu
         self.flappy_window.skin_manager.check_achievements(self.flappy_window.save_data)
 
         # Lưu toàn bộ tiến trình (coin, highscore, unlocked_skins) ngay khi chết
@@ -248,8 +253,8 @@ class GameView(BaseView):
         # 4. Vẽ chim (SpriteList)
         self.bird_list.draw()
 
-        # 5. Vẽ UI (Điểm số ở giữa trên, Coin ở góc phải trên)
-        self.score_text.draw()
+        # 5. Vẽ UI (Điểm số retro sprite ở giữa trên, Coin ở góc phải trên)
+        self.score_display.draw()
         self.coins_text.draw()
 
         # 6. Vẽ Debug Overlay nếu bật F2

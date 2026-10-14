@@ -1,10 +1,23 @@
 """Hằng số trò chơi Flappy Bird (Arcade 3.3.3)."""
+import sys
 from pathlib import Path
 
-# Thư mục gốc & đường dẫn assets
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+import pyglet
+# Tắt DirectWrite/font antialiasing toàn cục để render pixel art font 100% sắc nét (1-bit binary alpha)
+pyglet.options.text_antialiasing = False
+
+# Thư mục gốc, tài nguyên assets & dữ liệu lưu trữ
+if getattr(sys, "frozen", False):
+    # Đang chạy từ file thực thi PyInstaller (bundle tạm thời chứa assets)
+    PROJECT_ROOT = Path(sys._MEIPASS)
+    # File save_data.json lưu cạnh file .exe để lưu trữ vĩnh viễn tiến trình chơi
+    USER_ROOT = Path(sys.executable).resolve().parent
+else:
+    PROJECT_ROOT = Path(__file__).resolve().parent.parent
+    USER_ROOT = PROJECT_ROOT
+
 ASSETS_DIR = PROJECT_ROOT / "assets"
-DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR = USER_ROOT / "data"
 SAVE_FILE = DATA_DIR / "save_data.json"
 
 # Kích thước màn hình ảo (Virtual Viewport)
@@ -54,3 +67,22 @@ LERP_SPEED_FACTOR = 4.0          # Tốc độ hội tụ của Lerp qua từng 
 
 # Kinh tế & Thành tựu
 SCORE_PER_COIN = 5               # Cứ 5 điểm nhận 1 coin
+
+# Font Retro 8-bit Pixel Art & Safe Fallback
+FONT_DIR = ASSETS_DIR / "fonts"
+FONT_RETRO_PATH = FONT_DIR / "PressStart2P-Regular.ttf"
+FONT_RETRO_NAME = "Press Start 2P"
+FONT_RETRO_FAMILY = ("Press Start 2P", "Arial")
+
+
+def ensure_retro_font_loaded() -> bool:
+    """Nạp font Press Start 2P toàn cục vào Arcade/Pyglet an toàn."""
+    if FONT_RETRO_PATH.exists():
+        try:
+            import arcade
+            arcade.load_font(FONT_RETRO_PATH)
+            return True
+        except Exception:
+            return False
+    return False
+

@@ -4,7 +4,7 @@ from typing import Optional
 
 import arcade
 
-from ..constants import ASSETS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH
+from ..constants import ASSETS_DIR, FONT_RETRO_FAMILY, SCREEN_HEIGHT, SCREEN_WIDTH
 from ..entities.floor import Floor
 from ..models.skin import DEFAULT_SKINS, Skin
 from ..services.skin_manager import SkinManager
@@ -36,7 +36,7 @@ class ShopView(BaseView):
             try:
                 self.skin_textures[s.id] = arcade.load_texture(s.sprite_path)
             except Exception:
-                self.skin_textures[s.id] = arcade.load_texture(ASSETS_DIR / "skins" / "classic.png")
+                self.skin_textures[s.id] = arcade.load_texture(ASSETS_DIR / "skins" / "yellow.png")
 
         # Sprite xem trước trong Shop
         self.preview_sprite = arcade.Sprite()
@@ -52,39 +52,41 @@ class ShopView(BaseView):
         # Vùng click các nút UI (unprojected mouse bounds)
         self.btn_prev = (25.0, 65.0, 275.0, 325.0)    # Nút [<]
         self.btn_next = (223.0, 263.0, 275.0, 325.0)  # Nút [>]
-        self.btn_action = (SCREEN_WIDTH / 2.0 - 75.0, SCREEN_WIDTH / 2.0 + 75.0, 135.0, 175.0) # Nút Mua/Trang bị
-        self.btn_back = (SCREEN_WIDTH / 2.0 - 55.0, SCREEN_WIDTH / 2.0 + 55.0, 45.0, 80.0)      # Nút Trở về
+        self.btn_action = (SCREEN_WIDTH / 2.0 - 75.0, SCREEN_WIDTH / 2.0 + 75.0, 135.0, 175.0) # Nút Mua/Trang bị (rộng 150px)
+        self.btn_back = (SCREEN_WIDTH / 2.0 - 70.0, SCREEN_WIDTH / 2.0 + 70.0, 45.0, 80.0)      # Nút Trở về (rộng 140px chứa gọn "[ ESC ] BACK")
 
         act_cy = (self.btn_action[2] + self.btn_action[3]) / 2.0
         b_cy = (self.btn_back[2] + self.btn_back[3]) / 2.0
 
-        # Khởi tạo các đối tượng arcade.Text
+        # Khởi tạo các đối tượng arcade.Text với font pixel retro (font_size=6/12 chuẩn 1-bit pixel art)
         self.title_text = arcade.Text(
             "SKIN SHOP",
             SCREEN_WIDTH / 2.0,
             SCREEN_HEIGHT - 45.0,
             (255, 215, 0, 255),
-            font_size=20,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=12,
             anchor_x="center",
             anchor_y="center",
             bold=True,
         )
         self.coins_text = arcade.Text(
-            "Coins: 0",
-            SCREEN_WIDTH - 12.0,
-            SCREEN_HEIGHT - 18.0,
+            "COINS: 0",
+            SCREEN_WIDTH - 10.0,
+            SCREEN_HEIGHT - 16.0,
             (255, 215, 0, 255),
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="right",
             anchor_y="center",
-            bold=True,
         )
         self.prev_btn_text = arcade.Text(
             "<",
             45.0,
             300.0,
             arcade.color.WHITE,
-            font_size=18,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=12,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -94,7 +96,8 @@ class ShopView(BaseView):
             SCREEN_WIDTH - 45.0,
             300.0,
             arcade.color.WHITE,
-            font_size=18,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=12,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -104,7 +107,8 @@ class ShopView(BaseView):
             SCREEN_WIDTH / 2.0,
             218.0,
             arcade.color.WHITE,
-            font_size=13,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
             bold=True,
@@ -114,30 +118,37 @@ class ShopView(BaseView):
             SCREEN_WIDTH / 2.0,
             195.0,
             (200, 215, 230, 255),
-            font_size=9,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
+            multiline=True,
+            width=240,
+            align="center",
         )
         self.action_btn_text = arcade.Text(
             "",
             SCREEN_WIDTH / 2.0,
             act_cy,
             arcade.color.WHITE,
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
             bold=True,
         )
         self.back_btn_text = arcade.Text(
-            "[ ESC ] TRỞ VỀ",
+            "[ ESC ] BACK",
             SCREEN_WIDTH / 2.0,
             b_cy,
             (210, 220, 230, 255),
-            font_size=10,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
             bold=True,
         )
+        self.update_preview_texture()
 
     def update_ui_texts(self) -> None:
         """Cập nhật nội dung các text động khi chuyển đổi hoặc mua skin."""
@@ -146,32 +157,32 @@ class ShopView(BaseView):
         is_equipped = current_skin.id == save_data.equipped_skin
         is_unlocked = self.skin_manager.is_unlocked(current_skin, save_data)
 
-        self.coins_text.text = f"Coins: {save_data.coins}"
+        self.coins_text.text = f"COINS: {save_data.coins}"
         self.skin_name_text.text = f"{current_skin.name} ({self.selected_index + 1}/{len(self.skins)})"
         self.skin_desc_text.text = current_skin.description
 
         if is_equipped:
-            self.action_btn_text.text = "[ ĐANG DÙNG ]"
+            self.action_btn_text.text = "[ EQUIPPED ]"
             self.action_btn_text.color = arcade.color.WHITE
-            self.action_btn_text.font_size = 11
+            self.action_btn_text.font_size = 6
         elif is_unlocked:
-            self.action_btn_text.text = "TRANG BỊ (EQUIP)"
+            self.action_btn_text.text = "[ EQUIP ]"
             self.action_btn_text.color = arcade.color.WHITE
-            self.action_btn_text.font_size = 11
+            self.action_btn_text.font_size = 6
         else:
             if current_skin.unlock_type == "coin":
                 if save_data.coins >= current_skin.price:
-                    self.action_btn_text.text = f"MUA ({current_skin.price} COINS)"
+                    self.action_btn_text.text = f"[ BUY {current_skin.price} ]"
                     self.action_btn_text.color = arcade.color.WHITE
-                    self.action_btn_text.font_size = 11
+                    self.action_btn_text.font_size = 6
                 else:
-                    self.action_btn_text.text = f"CẦN {current_skin.price} COINS"
+                    self.action_btn_text.text = f"NEED {current_skin.price} COINS"
                     self.action_btn_text.color = (180, 180, 190, 255)
-                    self.action_btn_text.font_size = 10
+                    self.action_btn_text.font_size = 6
             else:
-                self.action_btn_text.text = "[ KHÓA THÀNH TỰU ]"
+                self.action_btn_text.text = "[ LOCKED ]"
                 self.action_btn_text.color = (230, 180, 180, 255)
-                self.action_btn_text.font_size = 10
+                self.action_btn_text.font_size = 6
 
     def on_show_view(self) -> None:
         super().on_show_view()
@@ -198,6 +209,10 @@ class ShopView(BaseView):
         tex = self.skin_textures.get(current_skin.id)
         if tex:
             self.preview_sprite.texture = tex
+            if getattr(tex, "height", 0) > 0:
+                self.preview_sprite.scale = (24.0 / float(tex.height)) * 1.5
+            else:
+                self.preview_sprite.scale = 1.5
 
     def on_update(self, delta_time: float) -> None:
         self.time += delta_time
@@ -326,7 +341,7 @@ class ShopView(BaseView):
         # Vẽ Sprite chim xem trước bằng SpriteList
         self.preview_list.draw()
 
-        # Tên Skin & Vị trí (VD: 1/5)
+        # Tên Skin & Vị trí (VD: 1/6)
         self.skin_name_text.draw()
 
         # Mô tả / Điều kiện

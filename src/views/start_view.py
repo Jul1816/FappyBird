@@ -7,6 +7,7 @@ from ..constants import (
     ASSETS_DIR,
     BIRD_START_X,
     BIRD_START_Y,
+    FONT_RETRO_FAMILY,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
 )
@@ -33,63 +34,71 @@ class StartView(BaseView):
 
         # Tọa độ nút Shop (để click chuột unproject)
         self.shop_button_bounds = (
-            SCREEN_WIDTH / 2.0 - 55.0,  # left
-            SCREEN_WIDTH / 2.0 + 55.0,  # right
+            SCREEN_WIDTH / 2.0 - 70.0,  # left (rộng 140px chứa gọn text retro)
+            SCREEN_WIDTH / 2.0 + 70.0,  # right
             70.0,                        # bottom
             105.0,                       # top
         )
         sb_bot, sb_top = self.shop_button_bounds[2], self.shop_button_bounds[3]
 
-        # Khởi tạo các đối tượng arcade.Text cố định
+        # Sprite thông điệp chào mừng (Get Ready / Flappy Bird retro)
+        self.message_sprite = arcade.Sprite(ASSETS_DIR / "sprites" / "message.png")
+        self.message_sprite.center_x = SCREEN_WIDTH / 2.0
+        self.message_sprite.center_y = 310.0
+        self.message_list = arcade.SpriteList()
+        self.message_list.append(self.message_sprite)
+
+        # Khởi tạo các đối tượng arcade.Text cố định (font_size=6 chuẩn 1-bit pixel art)
         self.title_text = arcade.Text(
             "FLAPPY BIRD",
             SCREEN_WIDTH / 2.0,
             SCREEN_HEIGHT - 120.0,
             (255, 215, 0, 255),
-            font_size=24,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=12,
             anchor_x="center",
             anchor_y="center",
             bold=True,
         )
         self.best_score_text = arcade.Text(
-            "BEST SCORE: 0",
+            "BEST: 0",
             SCREEN_WIDTH / 2.0,
-            SCREEN_HEIGHT - 155.0,
+            SCREEN_HEIGHT - 38.0,
             arcade.color.WHITE,
-            font_size=12,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
-            bold=True,
         )
         self.prompt_text = arcade.Text(
             "[ SPACE ] TO PLAY",
             SCREEN_WIDTH / 2.0,
             SCREEN_HEIGHT - 260.0,
             arcade.color.WHITE,
-            font_size=13,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
-            bold=True,
         )
         self.shop_btn_text = arcade.Text(
             "[ S ] SHOP",
             SCREEN_WIDTH / 2.0,
             (sb_bot + sb_top) / 2.0,
             arcade.color.WHITE,
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="center",
             anchor_y="center",
-            bold=True,
         )
         self.coins_text = arcade.Text(
-            "Coins: 0",
-            SCREEN_WIDTH - 12.0,
-            SCREEN_HEIGHT - 18.0,
+            "COINS: 0",
+            SCREEN_WIDTH - 10.0,
+            SCREEN_HEIGHT - 16.0,
             (255, 215, 0, 255),
-            font_size=11,
+            font_name=FONT_RETRO_FAMILY,
+            font_size=6,
             anchor_x="right",
             anchor_y="center",
-            bold=True,
         )
 
     def on_show_view(self) -> None:
@@ -99,14 +108,15 @@ class StartView(BaseView):
 
         # Cập nhật nội dung text theo dữ liệu save_data hiện tại
         best_score = self.flappy_window.save_data.high_score
-        self.best_score_text.text = f"BEST SCORE: {best_score}"
-        self.coins_text.text = f"Coins: {self.flappy_window.save_data.coins}"
+        self.best_score_text.text = f"BEST: {best_score}"
+        self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
 
+        # Chim thực tế nằm chính giữa vị trí icon chim đã xóa trên message.png (X=142.0, Y=259.0)
         texture = self.flappy_window.current_skin_texture
         self.bird = Bird(
             texture=texture,
-            center_x=float(BIRD_START_X),
-            center_y=float(BIRD_START_Y),
+            center_x=142.0,
+            center_y=259.0,
         )
         self.bird_list.clear()
         self.bird_list.append(self.bird)
@@ -120,10 +130,10 @@ class StartView(BaseView):
         alpha = int(180 + 75 * math.sin(self.time * 6.0))
         self.prompt_text.color = (255, 255, 255, alpha)
 
-        # Chim chuyển động điều hòa (SHM)
-
+        # Chim lắc lư điều hòa (SHM) ngay tại vị trí trung tâm hướng dẫn
         if self.bird:
-            self.bird.center_y = BIRD_START_Y + math.sin(self.time * 5.0) * 7.0
+            self.bird.center_x = 142.0
+            self.bird.center_y = 259.0 + math.sin(self.time * 5.0) * 7.0
             self.bird.angle = math.sin(self.time * 5.0) * 8.0
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
@@ -163,16 +173,11 @@ class StartView(BaseView):
 
         # Vẽ các Sprite bằng SpriteList (chuẩn Arcade 3.3)
         self.bg_list.draw()
+        self.message_list.draw()
         self.bird_list.draw()
 
-        # Tiêu đề game
-        self.title_text.draw()
-
-        # Highscore
+        # Highscore ở trên cùng
         self.best_score_text.draw()
-
-        # Hướng dẫn Space để chơi (nhấp nháy nhẹ)
-        self.prompt_text.draw()
 
         # Nút SHOP & SKINS
         sb_left, sb_right, sb_bot, sb_top = self.shop_button_bounds
