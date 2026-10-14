@@ -100,7 +100,7 @@ class TrailEmitter:
     """Quản lý sinh hạt, vòng đời và vẽ các hiệu ứng vệt bay (Particle & Ghost)."""
 
     MAX_PARTICLES: int = 50
-    EMIT_INTERVAL: float = 0.10
+    EMIT_INTERVAL: float = 0.08
 
     def __init__(
         self,
@@ -128,11 +128,11 @@ class TrailEmitter:
 
     @property
     def particle_life(self) -> float:
-        return 1.0 if self.preview_mode else 0.65
+        return 1.0
 
     @property
     def ghost_life(self) -> float:
-        return 0.80 if self.preview_mode else 0.50
+        return 0.80
 
     def calculate_auto_scale(self, texture: Optional[arcade.Texture]) -> float:
         """Chuẩn hóa kích thước hạt theo Bounding Box (cạnh lớn nhất nằm trong khung 18x18 px)."""
@@ -265,44 +265,32 @@ class TrailEmitter:
         bird_scale: float = 1.0,
         world_speed: float = 180.0,
     ) -> None:
-        """Kích hoạt phản hồi lực bùng nổ chùm hạt tức thì khi chim vỗ cánh (flap)."""
-        if not self.current_trail or self.current_trail.trail_type == "none":
+        """Kích hoạt phản hồi thị giác tức thì khi chim ấn nhảy (flap).
+
+        Sinh các hạt ngẫu nhiên xung quanh thân chim, không lùi về sau,
+        nổi nhẹ lên theo đà nhảy và tan biến cực nhanh (0.25s).
+        Loại vệt Ghost không sinh thêm khi nhảy.
+        """
+        if not self.current_trail or self.current_trail.trail_type != "particle" or not self.particle_texture:
             return
 
-        spawn_x = bird_x - 14.0
-        drift_vx = -0.55 * world_speed
-
-        if self.current_trail.trail_type == "particle" and self.particle_texture:
-            for _ in range(3):
-                spawn_y = bird_y + random.uniform(-5.0, 5.0)
-                vx = drift_vx + random.uniform(-15.0, 5.0)
-                vy = self._get_vertical_velocity(self.current_trail.id) + random.uniform(-10.0, 10.0)
-                particle = TrailParticle(
-                    texture=self.particle_texture,
-                    scale=self.particle_scale,
-                    center_x=spawn_x,
-                    center_y=spawn_y,
-                    vx=vx,
-                    vy=vy,
-                    life=random.uniform(0.50, 0.65),
-                    max_alpha=240,
-                    color=self.current_trail.color_tint,
-                )
-                self._add_particle(particle)
-
-        elif self.current_trail.trail_type == "ghost" and bird_texture:
-            ghost = GhostSnapshot(
-                texture=bird_texture,
-                scale=bird_scale,
-                center_x=bird_x,
-                center_y=bird_y,
-                angle=bird_angle,
-                vx=drift_vx,
-                life=0.50,
-                max_alpha=180,
-                color_tint=self.current_trail.color_tint,
+        for _ in range(5):
+            spawn_x = bird_x + random.uniform(-14.0, 14.0)
+            spawn_y = bird_y + random.uniform(-10.0, 10.0)
+            vx = random.uniform(-5.0, 5.0)
+            vy = random.uniform(20.0, 30.0)
+            particle = TrailParticle(
+                texture=self.particle_texture,
+                scale=self.particle_scale,
+                center_x=spawn_x,
+                center_y=spawn_y,
+                vx=vx,
+                vy=vy,
+                life=0.25,
+                max_alpha=240,
+                color=self.current_trail.color_tint,
             )
-            self._add_particle(ghost)
+            self._add_particle(particle)
 
     def _get_vertical_velocity(self, trail_id: str) -> float:
         """Tính vận tốc dọc phù hợp với từng chủ đề hạt."""
