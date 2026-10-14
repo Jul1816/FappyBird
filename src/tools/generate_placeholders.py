@@ -197,6 +197,84 @@ def ensure_audio_files(audio_dir: Path) -> None:
             generate_synthesized_wav(dest, duration=0.18, freq=freq)
 
 
+def create_star_particle_texture() -> Image.Image:
+    """Tạo sprite hạt sao vàng 8x8 pixel."""
+    w, h = 8, 8
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(im)
+    # Thân sao vàng
+    draw.rectangle([3, 1, 4, 6], fill=(255, 215, 0, 255))
+    draw.rectangle([1, 3, 6, 4], fill=(255, 215, 0, 255))
+    draw.rectangle([2, 2, 5, 5], fill=(255, 235, 50, 255))
+    # Điểm sáng tâm
+    draw.point((3, 3), fill=(255, 255, 255, 255))
+    draw.point((4, 3), fill=(255, 255, 255, 255))
+    return im
+
+
+def create_heart_particle_texture() -> Image.Image:
+    """Tạo sprite hạt tim hồng 8x8 pixel."""
+    w, h = 8, 8
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(im)
+    # 2 tai tim
+    draw.rectangle([1, 1, 2, 3], fill=(255, 80, 130, 255))
+    draw.rectangle([5, 1, 6, 3], fill=(255, 80, 130, 255))
+    # Thân tim
+    draw.rectangle([2, 1, 5, 4], fill=(255, 60, 110, 255))
+    draw.rectangle([2, 4, 5, 5], fill=(255, 50, 100, 255))
+    draw.rectangle([3, 6, 4, 6], fill=(230, 40, 80, 255))
+    # Highlight
+    draw.point((2, 2), fill=(255, 180, 210, 255))
+    draw.point((5, 2), fill=(255, 180, 210, 255))
+    return im
+
+
+def create_fire_particle_texture() -> Image.Image:
+    """Tạo sprite hạt lửa đỏ cam 8x8 pixel."""
+    w, h = 8, 8
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(im)
+    # Đế lửa đỏ đậm
+    draw.rectangle([2, 5, 5, 7], fill=(220, 40, 20, 255))
+    # Thân lửa cam
+    draw.rectangle([2, 3, 5, 5], fill=(255, 120, 20, 255))
+    draw.rectangle([3, 1, 4, 3], fill=(255, 200, 40, 255))
+    # Nhân trắng sáng
+    draw.rectangle([3, 4, 4, 5], fill=(255, 255, 180, 255))
+    return im
+
+
+def create_custom_trail_placeholder() -> Image.Image:
+    """Tạo sprite placeholder cho Custom Trail (viên ngọc tím 16x16 pixel)."""
+    w, h = 16, 16
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(im)
+    # Hình thoi kim cương tím neon
+    diamond = [(8, 1), (14, 8), (8, 14), (2, 8)]
+    draw.polygon(diamond, fill=(160, 60, 240, 255), outline=(100, 20, 180, 255))
+    inner = [(8, 3), (12, 8), (8, 12), (4, 8)]
+    draw.polygon(inner, fill=(200, 110, 255, 255))
+    # Điểm sáng trung tâm
+    draw.rectangle([7, 7, 9, 9], fill=(255, 230, 255, 255))
+    return im
+
+
+def generate_trail_sprites(trails_dir: Path | None = None, overwrite: bool = False) -> None:
+    """Tạo các sprite hạt vệt bay pixel art vào thư mục assets/sprites/trails/."""
+    target_dir = trails_dir or (ASSETS_DIR / "sprites" / "trails")
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    def _save_if(img: Image.Image, path: Path) -> None:
+        if overwrite or not path.exists():
+            img.save(path)
+
+    _save_if(create_star_particle_texture(), target_dir / "star.png")
+    _save_if(create_heart_particle_texture(), target_dir / "heart.png")
+    _save_if(create_fire_particle_texture(), target_dir / "fire.png")
+    _save_if(create_custom_trail_placeholder(), target_dir / "custom_trail.png")
+
+
 def generate_all_assets(overwrite: bool = True) -> None:
     """Tạo toàn bộ placeholder assets cho game nếu chưa có hoặc khi overwrite=True."""
     sprites_dir = ASSETS_DIR / "sprites"
@@ -223,33 +301,31 @@ def generate_all_assets(overwrite: bool = True) -> None:
     _save_if(create_coin_texture(), sprites_dir / "coin.png")
 
     # 2. Skins chim (Kích thước linh hoạt, thân chim chuẩn)
-    # classic (34x24)
     _save_if(
         create_bird_skin((34, 24), body_color=(250, 200, 40), belly_color=(255, 230, 120), wing_color=(240, 120, 40), beak_color=(255, 100, 0)),
         skins_dir / "classic.png",
     )
-    # blue_bird (32x32)
     _save_if(
         create_bird_skin((32, 32), body_color=(40, 150, 240), belly_color=(120, 200, 255), wing_color=(20, 90, 190), beak_color=(255, 150, 0)),
         skins_dir / "blue_bird.png",
     )
-    # red_bird (32x32)
     _save_if(
         create_bird_skin((32, 32), body_color=(230, 50, 50), belly_color=(255, 120, 120), wing_color=(170, 20, 20), beak_color=(255, 180, 0)),
         skins_dir / "red_bird.png",
     )
-    # cyber_bird (48x32)
     _save_if(
         create_bird_skin((48, 32), body_color=(180, 190, 200), belly_color=(130, 140, 150), wing_color=(90, 100, 110), beak_color=(0, 220, 200), extra_feature="cyber"),
         skins_dir / "cyber_bird.png",
     )
-    # golden_bird (64x64)
     _save_if(
         create_bird_skin((64, 64), body_color=(255, 215, 0), belly_color=(255, 245, 150), wing_color=(218, 165, 32), beak_color=(255, 90, 0), extra_feature="crown"),
         skins_dir / "golden_bird.png",
     )
 
-    # 3. Âm thanh
+    # 3. Trails sprites
+    generate_trail_sprites(sprites_dir / "trails", overwrite=overwrite)
+
+    # 4. Âm thanh
     ensure_audio_files(audio_dir)
     print("Assets ensured successfully!")
 
@@ -270,7 +346,11 @@ def ensure_assets_exist(overwrite: bool = False) -> None:
     if any(not f.exists() for f in required_files):
         generate_all_assets(overwrite=overwrite)
 
+    # Đảm bảo thư mục trail sprites luôn có sẵn các sprite cơ bản
+    generate_trail_sprites(ASSETS_DIR / "sprites" / "trails", overwrite=False)
+
 
 if __name__ == "__main__":
     generate_all_assets()
+
 
