@@ -57,8 +57,8 @@ class ShopView(BaseView):
         self.preview_list = arcade.SpriteList()
         self.preview_list.append(self.preview_sprite)
 
-        # Trail Emitter xem trước hiệu ứng vệt bay
-        self.trail_emitter = TrailEmitter(active_trail_id="none", is_active=False)
+        # Trail Emitter xem trước hiệu ứng vệt bay (chế độ preview: sinh hạt dày và sống lâu)
+        self.trail_emitter = TrailEmitter(active_trail_id="none", is_active=False, preview_mode=True)
 
         self.time: float = 0.0
 
@@ -320,13 +320,13 @@ class ShopView(BaseView):
         self.preview_sprite.center_y = 300.0 + math.sin(self.time * 4.0) * 5.0
         self.preview_sprite.angle = math.sin(self.time * 4.0) * 6.0
 
-        # Cập nhật vệt bay xem trước với vận tốc trôi nhẹ sang trái
+        # Cập nhật vệt bay xem trước với vận tốc trôi nhẹ sang trái tạo dải dài
         if self.trail_emitter.is_active:
             self.trail_emitter.update(
                 delta_time,
                 bird_pos=(self.preview_sprite.center_x, self.preview_sprite.center_y),
                 bird_sprite=self.preview_sprite,
-                world_speed=60.0,
+                world_speed=80.0,
             )
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:

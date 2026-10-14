@@ -100,15 +100,21 @@ class TrailEmitter:
     """Quản lý sinh hạt, vòng đời và vẽ các hiệu ứng vệt bay (Particle & Ghost)."""
 
     MAX_PARTICLES: int = 50
-    EMIT_INTERVAL: float = 0.06
+    EMIT_INTERVAL: float = 0.10
 
-    def __init__(self, active_trail_id: Optional[str] = None, is_active: bool = True) -> None:
+    def __init__(
+        self,
+        active_trail_id: Optional[str] = None,
+        is_active: bool = True,
+        preview_mode: bool = False,
+    ) -> None:
         self.particles = arcade.SpriteList()
         self.current_trail: Optional[Trail] = None
         self.particle_texture: Optional[arcade.Texture] = None
-        self.particle_scale: float = 1.0
+        self.particle_scale: float = 2.0
         self.emit_timer: float = 0.0
         self.is_active: bool = is_active
+        self.preview_mode: bool = preview_mode
         if active_trail_id:
             self.set_trail(active_trail_id)
 
@@ -116,14 +122,26 @@ class TrailEmitter:
     def active_trail_id(self) -> str:
         return self.current_trail.id if self.current_trail else "none"
 
+    @property
+    def emit_interval(self) -> float:
+        return 0.045 if self.preview_mode else self.EMIT_INTERVAL
+
+    @property
+    def particle_life(self) -> float:
+        return 1.0 if self.preview_mode else 0.65
+
+    @property
+    def ghost_life(self) -> float:
+        return 0.80 if self.preview_mode else 0.50
+
     def calculate_auto_scale(self, texture: Optional[arcade.Texture]) -> float:
-        """Chuẩn hóa kích thước hạt theo Bounding Box (cạnh lớn nhất nằm trong khung 14x14 px)."""
+        """Chuẩn hóa kích thước hạt theo Bounding Box (cạnh lớn nhất nằm trong khung 18x18 px)."""
         if not texture:
-            return 1.0
-        w = float(getattr(texture, "width", 14.0) or 14.0)
-        h = float(getattr(texture, "height", 14.0) or 14.0)
+            return 2.0
+        w = float(getattr(texture, "width", 18.0) or 18.0)
+        h = float(getattr(texture, "height", 18.0) or 18.0)
         max_dim = max(1.0, max(w, h))
-        return 14.0 / max_dim
+        return 18.0 / max_dim
 
     def set_trail(self, trail: Union[Trail, str, None]) -> None:
         """Chuyển đổi sang cấu hình vệt bay mới và nạp trước texture hạt nếu cần."""
@@ -134,7 +152,7 @@ class TrailEmitter:
         self.clear()
         self.emit_timer = 0.0
         self.particle_texture = None
-        self.particle_scale = 1.0
+        self.particle_scale = 2.0
 
         if not trail or trail.trail_type == "none":
             return
@@ -151,7 +169,7 @@ class TrailEmitter:
             if trail.id == "custom":
                 self.particle_scale = self.calculate_auto_scale(self.particle_texture)
             else:
-                self.particle_scale = 1.0
+                self.particle_scale = 2.0
 
     def _add_particle(self, sprite: arcade.Sprite) -> None:
         """Thêm hạt mới vào danh sách kèm chính sách FIFO (giải phóng hạt cũ nhất khi vượt ngưỡng 50)."""
@@ -200,13 +218,14 @@ class TrailEmitter:
             return
 
         self.emit_timer += dt
-        if self.emit_timer >= self.EMIT_INTERVAL:
+        if self.emit_timer >= self.emit_interval:
             self.emit_timer = 0.0
             spawn_x = bird_x - 14.0
             spawn_y = bird_y + random.uniform(-3.0, 3.0)
+            drift_vx = -0.55 * world_speed
 
             if self.current_trail.trail_type == "particle" and self.particle_texture:
-                vx = -world_speed + random.uniform(-10.0, 10.0)
+                vx = drift_vx + random.uniform(-8.0, 8.0)
                 vy = self._get_vertical_velocity(self.current_trail.id)
                 particle = TrailParticle(
                     texture=self.particle_texture,
@@ -215,7 +234,7 @@ class TrailEmitter:
                     center_y=spawn_y,
                     vx=vx,
                     vy=vy,
-                    life=0.45,
+                    life=self.particle_life,
                     max_alpha=220,
                     color=self.current_trail.color_tint,
                 )
@@ -228,8 +247,8 @@ class TrailEmitter:
                     center_x=bird_x,
                     center_y=bird_y,
                     angle=bird_angle,
-                    vx=-world_speed,
-                    life=0.35,
+                    vx=drift_vx,
+                    life=self.ghost_life,
                     max_alpha=150,
                     color_tint=self.current_trail.color_tint,
                 )
@@ -249,12 +268,13 @@ class TrailEmitter:
             return
 
         spawn_x = bird_x - 14.0
+        drift_vx = -0.55 * world_speed
 
         if self.current_trail.trail_type == "particle" and self.particle_texture:
-            for _ in range(4):
+            for _ in range(3):
                 spawn_y = bird_y + random.uniform(-5.0, 5.0)
-                vx = -world_speed + random.uniform(-20.0, 5.0)
-                vy = self._get_vertical_velocity(self.current_trail.id) + random.uniform(-15.0, 15.0)
+                vx = drift_vx + random.uniform(-15.0, 5.0)
+                vy = self._get_vertical_velocity(self.current_trail.id) + random.uniform(-10.0, 10.0)
                 particle = TrailParticle(
                     texture=self.particle_texture,
                     scale=self.particle_scale,
@@ -262,7 +282,7 @@ class TrailEmitter:
                     center_y=spawn_y,
                     vx=vx,
                     vy=vy,
-                    life=random.uniform(0.35, 0.48),
+                    life=random.uniform(0.50, 0.65),
                     max_alpha=240,
                     color=self.current_trail.color_tint,
                 )
@@ -275,8 +295,8 @@ class TrailEmitter:
                 center_x=bird_x,
                 center_y=bird_y,
                 angle=bird_angle,
-                vx=-world_speed,
-                life=0.38,
+                vx=drift_vx,
+                life=0.50,
                 max_alpha=180,
                 color_tint=self.current_trail.color_tint,
             )
