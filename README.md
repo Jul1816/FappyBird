@@ -42,9 +42,9 @@ run.bat
 > Script sẽ tự động kiểm tra Python, tạo môi trường ảo `.venv`, cài đặt thư viện cần thiết và khởi chạy game ngay lập tức.
 
 ### Cách 2: Chạy trực tiếp từ file `.exe` độc lập (Không cần cài Python)
-Nếu bạn đã build hoặc tải bản release, chỉ cần click đúp vào file:
+Chỉ cần click đúp vào file:
 ```text
-dist/FlappyBird.exe
+FlappyBird.exe
 ```
 > File chạy độc lập, tự động tích hợp sẵn runtime, đồ họa và âm thanh. File lưu tiến trình (`data/save_data.json`) sẽ tự động được lưu cạnh file `.exe`.
 

@@ -10,27 +10,27 @@ __pycache__/
 *$py.class
 *.tmp
 
-# PyInstaller build artifacts
+# PyInstaller & build artifacts (Bỏ toàn bộ thư mục build, dist, spec và build script)
 build/
 dist/
 *.spec
+build_exe.bat
 
-# Testing & quality caches
+# Cho phép git file game executable
+!FlappyBird.exe
+!*.exe
+
+# Testing, tasks, docs & cache (chỉ giữ file tối thiểu để chạy game)
+tests/
+tasks/
+docs/
+.superpowers/
 .pytest_cache/
 .coverage
 htmlcov/
 
 # Local game runtime & save data
 data/
-
-# Developer tasks, specifications & test suites (minimal runtime repo)
-tests/
-tasks/
-docs/
-.superpowers/
-SPEC.md
-SPEC-crisp-pixel-art.md
-SPEC-duck-skins.md
 
 # IDEs & OS files
 .vscode/
@@ -40,3 +40,8 @@ SPEC-duck-skins.md
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Markdown files: ĐẶC BIỆT KHÔNG GIT BẤT KỲ FILE MD NÀO TRỪ README
+*.md
+**/*.md
+!README.md
