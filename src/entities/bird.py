@@ -52,9 +52,12 @@ class Bird(arcade.Sprite):
 
     def set_skin_texture(self, texture: Optional[arcade.Texture]) -> None:
         """Cập nhật texture mới cho chim và tự động cân chỉnh scale phù hợp."""
-        self.texture = texture
-        if texture is not None and getattr(texture, "height", 0) > 0:
-            self.scale = STANDARD_HITBOX_HEIGHT / float(texture.height)
+        if texture is not None:
+            self.texture = texture
+            if getattr(texture, "height", 0) > 0:
+                self.scale = STANDARD_HITBOX_HEIGHT / float(texture.height)
+            else:
+                self.scale = 1.0
         else:
             self.scale = 1.0
 

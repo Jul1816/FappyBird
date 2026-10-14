@@ -15,10 +15,11 @@ def test_authentic_assets_exist_and_are_rgba():
         ASSETS_DIR / "sprites" / "pipe-green.png": (52, 320),
         ASSETS_DIR / "sprites" / "pipe-red.png": (52, 320),
         ASSETS_DIR / "sprites" / "message.png": (184, 267),
-        ASSETS_DIR / "sprites" / "gameover.png": (192, 42),
-        ASSETS_DIR / "skins" / "classic.png": (34, 24),
-        ASSETS_DIR / "skins" / "blue_bird.png": (34, 24),
-        ASSETS_DIR / "skins" / "red_bird.png": (34, 24),
+        ASSETS_DIR / "skins" / "yellow.png": (94, 56),
+        ASSETS_DIR / "skins" / "electric.png": (47, 30),
+        ASSETS_DIR / "skins" / "cyber.png": (44, 26),
+        ASSETS_DIR / "skins" / "royal.png": (47, 32),
+        ASSETS_DIR / "skins" / "fiery.png": (98, 65),
         ASSETS_DIR / "skins" / "custom_robin.png": (1023, 512),
     }
 
