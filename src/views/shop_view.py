@@ -341,7 +341,7 @@ class ShopView(BaseView):
         # Vẽ Sprite chim xem trước bằng SpriteList
         self.preview_list.draw()
 
-        # Tên Skin & Vị trí (VD: 1/5)
+        # Tên Skin & Vị trí (VD: 1/6)
         self.skin_name_text.draw()
 
         # Mô tả / Điều kiện

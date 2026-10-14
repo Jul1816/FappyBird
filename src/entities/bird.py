@@ -58,6 +58,12 @@ class Bird(arcade.Sprite):
                 self.scale = STANDARD_HITBOX_HEIGHT / float(texture.height)
             else:
                 self.scale = 1.0
+
+            # Phòng vệ: Tái khẳng định Hitbox chuẩn 34x24 px tâm (0, 0)
+            hw = STANDARD_HITBOX_WIDTH / 2.0
+            hh = STANDARD_HITBOX_HEIGHT / 2.0
+            standard_points = [(-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh)]
+            self.hit_box = hb.RotatableHitBox(standard_points, position=self.position)
         else:
             self.scale = 1.0
 

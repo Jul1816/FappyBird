@@ -260,7 +260,7 @@ def ensure_assets_exist(overwrite: bool = False) -> None:
         ASSETS_DIR / "sprites" / "background-day.png",
         ASSETS_DIR / "sprites" / "base.png",
         ASSETS_DIR / "sprites" / "pipe-green.png",
-        ASSETS_DIR / "skins" / "classic.png",
+        ASSETS_DIR / "skins" / "yellow.png",
         ASSETS_DIR / "audio" / "wing.wav",
     ]
     if any(not f.exists() for f in required_files):
