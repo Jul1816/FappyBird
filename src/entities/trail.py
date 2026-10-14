@@ -1,14 +1,15 @@
 """Thực thể quản lý hiệu ứng vệt bay (Trail Emitter, Particle & Ghost Snapshot)."""
 import random
-from typing import Optional
+from typing import Any, Optional, Union
 
 import arcade
 
 from ..constants import ASSETS_DIR
-from ..models.trail import Trail
+from ..models.trail import DEFAULT_TRAILS, Trail
 
 
 class TrailParticle(arcade.Sprite):
+
     """Hạt vệt bay di chuyển với vận tốc (vx, vy), tuổi thọ cố định và alpha mờ dần."""
 
     def __init__(
@@ -101,12 +102,19 @@ class TrailEmitter:
     MAX_PARTICLES: int = 50
     EMIT_INTERVAL: float = 0.06
 
-    def __init__(self) -> None:
+    def __init__(self, active_trail_id: Optional[str] = None, is_active: bool = True) -> None:
         self.particles = arcade.SpriteList()
         self.current_trail: Optional[Trail] = None
         self.particle_texture: Optional[arcade.Texture] = None
         self.particle_scale: float = 1.0
         self.emit_timer: float = 0.0
+        self.is_active: bool = is_active
+        if active_trail_id:
+            self.set_trail(active_trail_id)
+
+    @property
+    def active_trail_id(self) -> str:
+        return self.current_trail.id if self.current_trail else "none"
 
     def calculate_auto_scale(self, texture: Optional[arcade.Texture]) -> float:
         """Chuẩn hóa kích thước hạt theo Bounding Box (cạnh lớn nhất nằm trong khung 14x14 px)."""
@@ -117,8 +125,11 @@ class TrailEmitter:
         max_dim = max(1.0, max(w, h))
         return 14.0 / max_dim
 
-    def set_trail(self, trail: Optional[Trail]) -> None:
+    def set_trail(self, trail: Union[Trail, str, None]) -> None:
         """Chuyển đổi sang cấu hình vệt bay mới và nạp trước texture hạt nếu cần."""
+        if isinstance(trail, str):
+            trail = next((t for t in DEFAULT_TRAILS if t.id == trail), None)
+
         self.current_trail = trail
         self.clear()
         self.emit_timer = 0.0
@@ -152,12 +163,15 @@ class TrailEmitter:
     def update(
         self,
         dt: float,
-        world_speed: float,
-        bird_x: float,
-        bird_y: float,
-        bird_angle: float,
-        bird_texture: Optional[arcade.Texture],
+        world_speed: float = 180.0,
+        bird_x: float = 0.0,
+        bird_y: float = 0.0,
+        bird_angle: float = 0.0,
+        bird_texture: Optional[arcade.Texture] = None,
         bird_scale: float = 1.0,
+        bird_pos: Optional[tuple[float, float]] = None,
+        bird_sprite: Optional[arcade.Sprite] = None,
+        **kwargs: Any,
     ) -> None:
         """Cập nhật toàn bộ hạt hiện có và sinh hạt mới theo định kỳ khi bay."""
         # 1. Cập nhật các hạt / bóng ma đang sống
@@ -168,6 +182,18 @@ class TrailEmitter:
             elif isinstance(p, GhostSnapshot):
                 if not p.update_ghost(dt):
                     p.remove_from_sprite_lists()
+
+        if not self.is_active:
+            return
+
+        if bird_pos is not None:
+            bird_x, bird_y = bird_pos
+        if bird_sprite is not None:
+            bird_x = bird_sprite.center_x
+            bird_y = bird_sprite.center_y
+            bird_angle = bird_sprite.angle
+            bird_texture = bird_sprite.texture
+            bird_scale = getattr(bird_sprite, "scale", 1.0)
 
         # 2. Sinh hạt mới nếu đang trang bị trail hoạt động
         if not self.current_trail or self.current_trail.trail_type == "none":
