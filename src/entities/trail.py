@@ -20,7 +20,7 @@ class TrailParticle(arcade.Sprite):
         center_y: float = 0.0,
         vx: float = 0.0,
         vy: float = 0.0,
-        life: float = 0.45,
+        life: float = 1.0,
         max_alpha: int = 220,
         color: tuple[int, int, int] = (255, 255, 255),
     ) -> None:
@@ -64,7 +64,7 @@ class GhostSnapshot(arcade.Sprite):
         center_y: float = 0.0,
         angle: float = 0.0,
         vx: float = 0.0,
-        life: float = 0.35,
+        life: float = 0.80,
         max_alpha: int = 160,
         color_tint: tuple[int, int, int] = (255, 255, 255),
     ) -> None:
@@ -101,6 +101,14 @@ class TrailEmitter:
 
     MAX_PARTICLES: int = 50
     EMIT_INTERVAL: float = 0.08
+    PARTICLE_LIFE: float = 1.0
+    GHOST_LIFE: float = 0.80
+    BURST_COUNT: int = 5
+    BURST_LIFE: float = 0.25
+    BURST_ALPHA: int = 240
+    BURST_OFFSET_X: float = 14.0
+    BURST_OFFSET_Y: float = 10.0
+    BURST_VELOCITY_Y_RANGE: tuple[float, float] = (20.0, 30.0)
 
     def __init__(
         self,
@@ -128,11 +136,11 @@ class TrailEmitter:
 
     @property
     def particle_life(self) -> float:
-        return 1.0
+        return self.PARTICLE_LIFE
 
     @property
     def ghost_life(self) -> float:
-        return 0.80
+        return self.GHOST_LIFE
 
     def calculate_auto_scale(self, texture: Optional[arcade.Texture]) -> float:
         """Chuẩn hóa kích thước hạt theo Bounding Box (cạnh lớn nhất nằm trong khung 18x18 px)."""
@@ -260,10 +268,11 @@ class TrailEmitter:
         self,
         bird_x: float,
         bird_y: float,
-        bird_angle: float,
-        bird_texture: Optional[arcade.Texture],
-        bird_scale: float = 1.0,
-        world_speed: float = 180.0,
+        _bird_angle: float = 0.0,
+        _bird_texture: Optional[arcade.Texture] = None,
+        _bird_scale: float = 1.0,
+        _world_speed: float = 180.0,
+        **kwargs: Any,
     ) -> None:
         """Kích hoạt phản hồi thị giác tức thì khi chim ấn nhảy (flap).
 
@@ -271,14 +280,14 @@ class TrailEmitter:
         nổi nhẹ lên theo đà nhảy và tan biến cực nhanh (0.25s).
         Loại vệt Ghost không sinh thêm khi nhảy.
         """
-        if not self.current_trail or self.current_trail.trail_type != "particle" or not self.particle_texture:
+        if not self.is_active or not self.current_trail or self.current_trail.trail_type != "particle" or not self.particle_texture:
             return
 
-        for _ in range(5):
-            spawn_x = bird_x + random.uniform(-14.0, 14.0)
-            spawn_y = bird_y + random.uniform(-10.0, 10.0)
+        for _ in range(self.BURST_COUNT):
+            spawn_x = bird_x + random.uniform(-self.BURST_OFFSET_X, self.BURST_OFFSET_X)
+            spawn_y = bird_y + random.uniform(-self.BURST_OFFSET_Y, self.BURST_OFFSET_Y)
             vx = random.uniform(-5.0, 5.0)
-            vy = random.uniform(20.0, 30.0)
+            vy = random.uniform(self.BURST_VELOCITY_Y_RANGE[0], self.BURST_VELOCITY_Y_RANGE[1])
             particle = TrailParticle(
                 texture=self.particle_texture,
                 scale=self.particle_scale,
@@ -286,8 +295,8 @@ class TrailEmitter:
                 center_y=spawn_y,
                 vx=vx,
                 vy=vy,
-                life=0.25,
-                max_alpha=240,
+                life=self.BURST_LIFE,
+                max_alpha=self.BURST_ALPHA,
                 color=self.current_trail.color_tint,
             )
             self._add_particle(particle)
