@@ -36,7 +36,7 @@ class ShopView(BaseView):
             try:
                 self.skin_textures[s.id] = arcade.load_texture(s.sprite_path)
             except Exception:
-                self.skin_textures[s.id] = arcade.load_texture(ASSETS_DIR / "skins" / "classic.png")
+                self.skin_textures[s.id] = arcade.load_texture(ASSETS_DIR / "skins" / "yellow.png")
 
         # Sprite xem trước trong Shop
         self.preview_sprite = arcade.Sprite()

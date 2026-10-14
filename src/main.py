@@ -72,7 +72,7 @@ class FlappyWindow(arcade.Window):
         try:
             self.current_skin_texture = arcade.load_texture(skin_obj.sprite_path)
         except Exception:
-            self.current_skin_texture = arcade.load_texture(ASSETS_DIR / "skins" / "classic.png")
+            self.current_skin_texture = arcade.load_texture(ASSETS_DIR / "skins" / "yellow.png")
 
     def save_progress(self) -> None:
         """Lưu trạng thái hiện tại vào save_data.json."""

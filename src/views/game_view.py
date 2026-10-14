@@ -225,7 +225,7 @@ class GameView(BaseView):
         if self.score > self.flappy_window.save_data.high_score:
             self.flappy_window.save_data.high_score = self.score
 
-        # Tự động kiểm tra và mở khóa thành tựu (cyber_bird / golden_bird) trước khi lưu
+        # Tự động kiểm tra và mở khóa thành tựu (cyber / fiery / royal) trước khi lưu
         self.flappy_window.skin_manager.check_achievements(self.flappy_window.save_data)
 
         # Lưu toàn bộ tiến trình (coin, highscore, unlocked_skins) ngay khi chết
