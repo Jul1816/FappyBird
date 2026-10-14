@@ -256,6 +256,10 @@ def generate_all_assets(overwrite: bool = True) -> None:
 
 def ensure_assets_exist(overwrite: bool = False) -> None:
     """Tự động kiểm tra và sinh asset nếu thiếu mà không ghi đè tài nguyên hiện có."""
+    import sys
+    if getattr(sys, "frozen", False):
+        return
+
     required_files = [
         ASSETS_DIR / "sprites" / "background-day.png",
         ASSETS_DIR / "sprites" / "base.png",

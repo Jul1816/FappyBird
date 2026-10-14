@@ -1,14 +1,23 @@
 """Hằng số trò chơi Flappy Bird (Arcade 3.3.3)."""
+import sys
 from pathlib import Path
 
 import pyglet
 # Tắt DirectWrite/font antialiasing toàn cục để render pixel art font 100% sắc nét (1-bit binary alpha)
 pyglet.options.text_antialiasing = False
 
-# Thư mục gốc & đường dẫn assets
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+# Thư mục gốc, tài nguyên assets & dữ liệu lưu trữ
+if getattr(sys, "frozen", False):
+    # Đang chạy từ file thực thi PyInstaller (bundle tạm thời chứa assets)
+    PROJECT_ROOT = Path(sys._MEIPASS)
+    # File save_data.json lưu cạnh file .exe để lưu trữ vĩnh viễn tiến trình chơi
+    USER_ROOT = Path(sys.executable).resolve().parent
+else:
+    PROJECT_ROOT = Path(__file__).resolve().parent.parent
+    USER_ROOT = PROJECT_ROOT
+
 ASSETS_DIR = PROJECT_ROOT / "assets"
-DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR = USER_ROOT / "data"
 SAVE_FILE = DATA_DIR / "save_data.json"
 
 # Kích thước màn hình ảo (Virtual Viewport)
