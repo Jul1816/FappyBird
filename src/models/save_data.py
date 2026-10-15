@@ -5,7 +5,8 @@ from typing import Any
 VALID_SKIN_IDS = {"yellow", "electric", "cyber", "royal", "fiery", "custom_robin"}
 DEPRECATED_SKIN_IDS = {"classic", "blue_bird", "red_bird", "cyber_bird", "golden_bird"}
 
-VALID_TRAIL_IDS = {"none", "custom", "ghost", "star", "heart", "fire", "shadow"}
+VALID_TRAIL_IDS = {"none", "primo", "money", "fiery", "heart", "ghost", "shadow"}
+LEGACY_TRAIL_MAP = {"custom": "primo", "star": "money", "fire": "fiery"}
 
 
 @dataclass
@@ -16,7 +17,7 @@ class SaveData:
     equipped_skin: str = "yellow"
     unlocked_skins: list[str] = field(default_factory=lambda: ["yellow"])
     equipped_trail: str = "none"
-    unlocked_trails: list[str] = field(default_factory=lambda: ["none", "custom"])
+    unlocked_trails: list[str] = field(default_factory=lambda: ["none"])
 
     @staticmethod
     def _safe_int(value: Any, default: int = 0) -> int:
@@ -70,24 +71,25 @@ class SaveData:
         if equipped_skin not in unlocked_skins:
             equipped_skin = "yellow"
 
-        # 2. Khử trùng & nạp Trail
+        # 2. Khử trùng & nạp Trail (hỗ trợ di trú ID cũ custom -> primo, star -> money, fire -> fiery)
         equipped_trail = str(data.get("equipped_trail", "none") or "none")
-        raw_unlocked_trails = data.get("unlocked_trails", ["none", "custom"])
+        equipped_trail = LEGACY_TRAIL_MAP.get(equipped_trail, equipped_trail)
+
+        raw_unlocked_trails = data.get("unlocked_trails", ["none"])
         if not isinstance(raw_unlocked_trails, list):
-            raw_unlocked_trails = ["none", "custom"]
+            raw_unlocked_trails = ["none"]
 
         filtered_trails = []
         for t in raw_unlocked_trails:
             if isinstance(t, (str, int)) and not isinstance(t, bool):
                 t_str = str(t)
+                t_str = LEGACY_TRAIL_MAP.get(t_str, t_str)
                 if t_str in VALID_TRAIL_IDS:
                     filtered_trails.append(t_str)
 
         unlocked_trails = list(dict.fromkeys(filtered_trails))
         if "none" not in unlocked_trails:
             unlocked_trails.insert(0, "none")
-        if "custom" not in unlocked_trails:
-            unlocked_trails.append("custom")
 
         if equipped_trail not in unlocked_trails:
             equipped_trail = "none"

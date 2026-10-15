@@ -170,14 +170,11 @@ class TrailEmitter:
                 self.particle_texture = arcade.load_texture(trail.sprite_path)
             except Exception:
                 try:
-                    self.particle_texture = arcade.load_texture(ASSETS_DIR / "sprites" / "trails" / "star.png")
+                    self.particle_texture = arcade.load_texture(ASSETS_DIR / "trails" / "primo.png")
                 except Exception:
                     self.particle_texture = None
 
-            if trail.id == "custom":
-                self.particle_scale = self.calculate_auto_scale(self.particle_texture)
-            else:
-                self.particle_scale = 2.0
+            self.particle_scale = self.calculate_auto_scale(self.particle_texture)
 
     def _add_particle(self, sprite: arcade.Sprite) -> None:
         """Thêm hạt mới vào danh sách kèm chính sách FIFO (giải phóng hạt cũ nhất khi vượt ngưỡng 50)."""
@@ -237,9 +234,10 @@ class TrailEmitter:
             if self.current_trail.trail_type == "particle" and self.particle_texture:
                 vx = drift_vx + random.uniform(-8.0, 8.0)
                 vy = self._get_vertical_velocity(self.current_trail.id)
+                scale = self.particle_scale * random.uniform(0.5, 1.0)
                 particle = TrailParticle(
                     texture=self.particle_texture,
-                    scale=self.particle_scale,
+                    scale=scale,
                     center_x=spawn_x,
                     center_y=spawn_y,
                     vx=vx,
@@ -288,9 +286,10 @@ class TrailEmitter:
             spawn_y = bird_y + random.uniform(-self.BURST_OFFSET_Y, self.BURST_OFFSET_Y)
             vx = random.uniform(-5.0, 5.0)
             vy = random.uniform(self.BURST_VELOCITY_Y_RANGE[0], self.BURST_VELOCITY_Y_RANGE[1])
+            scale = self.particle_scale * random.uniform(0.5, 1.0)
             particle = TrailParticle(
                 texture=self.particle_texture,
-                scale=self.particle_scale,
+                scale=scale,
                 center_x=spawn_x,
                 center_y=spawn_y,
                 vx=vx,
@@ -303,13 +302,15 @@ class TrailEmitter:
 
     def _get_vertical_velocity(self, trail_id: str) -> float:
         """Tính vận tốc dọc phù hợp với từng chủ đề hạt."""
-        if trail_id == "fire":
+        if trail_id in ("fire", "fiery"):
             return random.uniform(20.0, 50.0)
         elif trail_id == "heart":
             return random.uniform(5.0, 25.0)
-        elif trail_id == "star":
+        elif trail_id in ("star", "money"):
             return random.uniform(-15.0, 15.0)
-        else:  # custom
+        elif trail_id in ("custom", "primo"):
+            return random.uniform(-10.0, 20.0)
+        else:
             return random.uniform(-10.0, 20.0)
 
     def draw(self) -> None:

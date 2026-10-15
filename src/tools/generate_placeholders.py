@@ -261,28 +261,30 @@ def create_custom_trail_placeholder() -> Image.Image:
 
 
 def generate_trail_sprites(trails_dir: Path | None = None, overwrite: bool = False) -> None:
-    """Tạo các sprite hạt vệt bay pixel art vào thư mục assets/sprites/trails/."""
-    target_dir = trails_dir or (ASSETS_DIR / "sprites" / "trails")
+    """Tạo các sprite hạt vệt bay pixel art vào thư mục assets/trails/."""
+    target_dir = trails_dir or (ASSETS_DIR / "trails")
     target_dir.mkdir(parents=True, exist_ok=True)
 
     def _save_if(img: Image.Image, path: Path) -> None:
         if overwrite or not path.exists():
             img.save(path)
 
-    _save_if(create_star_particle_texture(), target_dir / "star.png")
+    _save_if(create_star_particle_texture(), target_dir / "money.png")
     _save_if(create_heart_particle_texture(), target_dir / "heart.png")
-    _save_if(create_fire_particle_texture(), target_dir / "fire.png")
-    _save_if(create_custom_trail_placeholder(), target_dir / "custom_trail.png")
+    _save_if(create_fire_particle_texture(), target_dir / "fiery.png")
+    _save_if(create_custom_trail_placeholder(), target_dir / "primo.png")
 
 
 def generate_all_assets(overwrite: bool = True) -> None:
     """Tạo toàn bộ placeholder assets cho game nếu chưa có hoặc khi overwrite=True."""
     sprites_dir = ASSETS_DIR / "sprites"
     skins_dir = ASSETS_DIR / "skins"
+    trails_dir = ASSETS_DIR / "trails"
     audio_dir = ASSETS_DIR / "audio"
 
     sprites_dir.mkdir(parents=True, exist_ok=True)
     skins_dir.mkdir(parents=True, exist_ok=True)
+    trails_dir.mkdir(parents=True, exist_ok=True)
     audio_dir.mkdir(parents=True, exist_ok=True)
 
     def _save_if(img: Image.Image, path: Path) -> None:
@@ -322,8 +324,8 @@ def generate_all_assets(overwrite: bool = True) -> None:
         skins_dir / "golden_bird.png",
     )
 
-    # 3. Trails sprites
-    generate_trail_sprites(sprites_dir / "trails", overwrite=overwrite)
+    # 3. Trails sprites (ngang hàng với skins)
+    generate_trail_sprites(trails_dir, overwrite=overwrite)
 
     # 4. Âm thanh
     ensure_audio_files(audio_dir)
@@ -347,7 +349,7 @@ def ensure_assets_exist(overwrite: bool = False) -> None:
         generate_all_assets(overwrite=overwrite)
 
     # Đảm bảo thư mục trail sprites luôn có sẵn các sprite cơ bản
-    generate_trail_sprites(ASSETS_DIR / "sprites" / "trails", overwrite=False)
+    generate_trail_sprites(ASSETS_DIR / "trails", overwrite=False)
 
 
 if __name__ == "__main__":

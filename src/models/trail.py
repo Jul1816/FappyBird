@@ -21,8 +21,8 @@ class Trail:
     description: str = ""
 
 
-# Thư mục sprite chứa các hạt vệt bay
-TRAILS_SPRITES_DIR = ASSETS_DIR / "sprites" / "trails"
+# Thư mục sprite chứa các hạt vệt bay (ngang hàng với skins)
+TRAILS_SPRITES_DIR = ASSETS_DIR / "trails"
 
 # Danh mục 7 trail khởi tạo
 DEFAULT_TRAILS: list[Trail] = [
@@ -36,14 +36,44 @@ DEFAULT_TRAILS: list[Trail] = [
         description="No trail effect.",
     ),
     Trail(
-        id="custom",
-        name="Custom Trail",
+        id="money",
+        name="Money",
         trail_type="particle",
-        unlock_type="default",
-        unlock_value=0,
+        unlock_type="coin",
+        unlock_value=50,
+        price=50,
+        sprite_path=str(TRAILS_SPRITES_DIR / "money.png"),
+        description="Paper wealth flutter (50 Coins).",
+    ),
+    Trail(
+        id="heart",
+        name="Heart",
+        trail_type="particle",
+        unlock_type="coin",
+        unlock_value=25,
+        price=25,
+        sprite_path=str(TRAILS_SPRITES_DIR / "heart.png"),
+        description="Fluttering hearts (25 Coins).",
+    ),
+    Trail(
+        id="fiery",
+        name="Fiery",
+        trail_type="particle",
+        unlock_type="highscore",
+        unlock_value=40,
         price=0,
-        sprite_path=str(TRAILS_SPRITES_DIR / "custom_trail.png"),
-        description="Custom sprite trail from assets.",
+        sprite_path=str(TRAILS_SPRITES_DIR / "fiery.png"),
+        description="Unlock at High Score >= 40.",
+    ),
+    Trail(
+        id="primo",
+        name="Primo",
+        trail_type="particle",
+        unlock_type="coin",
+        unlock_value=70,
+        price=70,
+        sprite_path=str(TRAILS_SPRITES_DIR / "primo.png"),
+        description="Genshin wishes spark (70 Coins).",
     ),
     Trail(
         id="ghost",
@@ -54,36 +84,6 @@ DEFAULT_TRAILS: list[Trail] = [
         price=0,
         color_tint=(255, 255, 255),
         description="Unlock at High Score >= 15.",
-    ),
-    Trail(
-        id="star",
-        name="Star Dust",
-        trail_type="particle",
-        unlock_type="coin",
-        unlock_value=15,
-        price=15,
-        sprite_path=str(TRAILS_SPRITES_DIR / "star.png"),
-        description="Shining star dust (15 Coins).",
-    ),
-    Trail(
-        id="heart",
-        name="Love Flutter",
-        trail_type="particle",
-        unlock_type="coin",
-        unlock_value=25,
-        price=25,
-        sprite_path=str(TRAILS_SPRITES_DIR / "heart.png"),
-        description="Fluttering hearts (25 Coins).",
-    ),
-    Trail(
-        id="fire",
-        name="Fiery Spark",
-        trail_type="particle",
-        unlock_type="highscore",
-        unlock_value=40,
-        price=0,
-        sprite_path=str(TRAILS_SPRITES_DIR / "fire.png"),
-        description="Unlock at High Score >= 40.",
     ),
     Trail(
         id="shadow",
