@@ -27,7 +27,7 @@ DEFAULT_SKINS: list[Skin] = [
         unlock_type="default",
         unlock_value=0,
         sprite_path=str(ASSETS_DIR / "skins" / "yellow.png"),
-        description="The friendly yellow duck.",
+        description="The friendly yellow duck.\nUnlocked by Default",
     ),
     Skin(
         id="electric",
@@ -36,7 +36,7 @@ DEFAULT_SKINS: list[Skin] = [
         unlock_type="coin",
         unlock_value=10,
         sprite_path=str(ASSETS_DIR / "skins" / "electric.png"),
-        description="Agile electric flyer (10 Coins).",
+        description="Agile electric flyer.\nUnlock: 10 Coins",
     ),
     Skin(
         id="cyber",
@@ -45,7 +45,7 @@ DEFAULT_SKINS: list[Skin] = [
         unlock_type="highscore",
         unlock_value=25,
         sprite_path=str(ASSETS_DIR / "skins" / "cyber.png"),
-        description="Unlock at High Score >= 25.",
+        description="Futuristic cyborg duck.\nUnlock: High Score >= 25",
     ),
     Skin(
         id="royal",
@@ -54,7 +54,7 @@ DEFAULT_SKINS: list[Skin] = [
         unlock_type="total_coins",
         unlock_value=100,
         sprite_path=str(ASSETS_DIR / "skins" / "royal.png"),
-        description="Unlock at Total Coins >= 100.",
+        description="Crowned majestic duck.\nUnlock: Total Coins >= 100",
     ),
     Skin(
         id="fiery",
@@ -63,7 +63,7 @@ DEFAULT_SKINS: list[Skin] = [
         unlock_type="highscore",
         unlock_value=50,
         sprite_path=str(ASSETS_DIR / "skins" / "fiery.png"),
-        description="Unlock at High Score >= 50.",
+        description="Blazing mythical phoenix.\nUnlock: High Score >= 50",
     ),
     Skin(
         id="custom_robin",
@@ -72,7 +72,7 @@ DEFAULT_SKINS: list[Skin] = [
         unlock_type="default",
         unlock_value=0,
         sprite_path=str(ASSETS_DIR / "skins" / "custom_robin.png"),
-        description="Angel Robin custom skin.",
+        description="Heavenly angel robin.\nUnlocked by Default",
     ),
 ]
 
