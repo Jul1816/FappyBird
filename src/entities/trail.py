@@ -5,7 +5,7 @@ from typing import Any, Optional, Union
 import arcade
 
 from ..constants import ASSETS_DIR
-from ..models.trail import DEFAULT_TRAILS, Trail
+from ..models.trail import DEFAULT_TRAILS, TRAILS_SPRITES_DIR, Trail
 
 
 class TrailParticle(arcade.Sprite):
@@ -170,7 +170,7 @@ class TrailEmitter:
                 self.particle_texture = arcade.load_texture(trail.sprite_path)
             except Exception:
                 try:
-                    self.particle_texture = arcade.load_texture(ASSETS_DIR / "trails" / "primo.png")
+                    self.particle_texture = arcade.load_texture(TRAILS_SPRITES_DIR / "primo.png")
                 except Exception:
                     self.particle_texture = None
 

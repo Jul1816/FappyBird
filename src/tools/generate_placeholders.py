@@ -261,12 +261,13 @@ def create_custom_trail_placeholder() -> Image.Image:
 
 
 def generate_trail_sprites(trails_dir: Path | None = None, overwrite: bool = False) -> None:
-    """Tạo các sprite hạt vệt bay pixel art vào thư mục assets/trails/."""
+    """Tạo các sprite hạt vệt bay pixel art vào thư mục assets/trails/ nếu chưa tồn tại."""
     target_dir = trails_dir or (ASSETS_DIR / "trails")
     target_dir.mkdir(parents=True, exist_ok=True)
 
     def _save_if(img: Image.Image, path: Path) -> None:
-        if overwrite or not path.exists():
+        # Không bao giờ ghi đè sprite custom thật đã tồn tại
+        if not path.exists():
             img.save(path)
 
     _save_if(create_star_particle_texture(), target_dir / "money.png")
@@ -275,8 +276,8 @@ def generate_trail_sprites(trails_dir: Path | None = None, overwrite: bool = Fal
     _save_if(create_custom_trail_placeholder(), target_dir / "primo.png")
 
 
-def generate_all_assets(overwrite: bool = True) -> None:
-    """Tạo toàn bộ placeholder assets cho game nếu chưa có hoặc khi overwrite=True."""
+def generate_all_assets(overwrite: bool = False) -> None:
+    """Tạo toàn bộ placeholder assets cho game nếu chưa có (mặc định không ghi đè)."""
     sprites_dir = ASSETS_DIR / "sprites"
     skins_dir = ASSETS_DIR / "skins"
     trails_dir = ASSETS_DIR / "trails"
