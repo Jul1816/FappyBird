@@ -1,4 +1,3 @@
-"""Dịch vụ quản lý và phát hiệu ứng âm thanh (SFX)."""
 import logging
 from pathlib import Path
 from typing import Optional
@@ -30,7 +29,6 @@ class AudioService:
                 self.sounds[name] = None
 
     def play(self, name: str) -> None:
-        """Phát hiệu ứng âm thanh theo tên."""
         sound = self.sounds.get(name)
         if sound:
             try:
