@@ -1,4 +1,4 @@
-"""Thực thể quản lý hiệu ứng vệt bay (Trail Emitter, Particle & Ghost Snapshot)."""
+"""Trail emitter, particle và ghost snapshot effect cho Bird."""
 import random
 from typing import Any, Optional, Union
 
@@ -9,8 +9,7 @@ from ..models.trail import DEFAULT_TRAILS, TRAILS_SPRITES_DIR, Trail
 
 
 class TrailParticle(arcade.Sprite):
-
-    """Hạt vệt bay di chuyển với vận tốc (vx, vy), tuổi thọ cố định và alpha mờ dần."""
+    """Particle trail di chuyển theo velocity (vx, vy), lifetime và fade alpha."""
 
     def __init__(
         self,
@@ -38,7 +37,7 @@ class TrailParticle(arcade.Sprite):
         self.color = (color[0], color[1], color[2], max_alpha)
 
     def update_particle(self, dt: float) -> bool:
-        """Cập nhật tọa độ và độ trong suốt. Trả về False nếu hạt đã hết hạn."""
+        """Update vị trí và fade alpha. Return False nếu particle hết lifetime."""
         self.age += dt
         if self.age >= self.life:
             return False
@@ -54,7 +53,7 @@ class TrailParticle(arcade.Sprite):
 
 
 class GhostSnapshot(arcade.Sprite):
-    """Bóng ma chụp lại hình dáng, tỷ lệ scale và góc nghiêng của chim, trôi lùi theo thế giới."""
+    """Ghost snapshot lưu lại sprite texture, scale và angle của Bird, drift theo world speed."""
 
     def __init__(
         self,
@@ -82,7 +81,7 @@ class GhostSnapshot(arcade.Sprite):
         self.color = (color_tint[0], color_tint[1], color_tint[2], max_alpha)
 
     def update_ghost(self, dt: float) -> bool:
-        """Cập nhật độ mờ dần và vị trí trôi ngang. Trả về False khi hết hạn."""
+        """Update fade alpha và horizontal drift. Return False khi hết lifetime."""
         self.age += dt
         if self.age >= self.life:
             return False
@@ -97,7 +96,7 @@ class GhostSnapshot(arcade.Sprite):
 
 
 class TrailEmitter:
-    """Quản lý sinh hạt, vòng đời và vẽ các hiệu ứng vệt bay (Particle & Ghost)."""
+    """TrailEmitter quản lý spawn, lifecycle và render trail effects (Particle & Ghost)."""
 
     MAX_PARTICLES: int = 50
     EMIT_INTERVAL: float = 0.08
@@ -143,7 +142,7 @@ class TrailEmitter:
         return self.GHOST_LIFE
 
     def calculate_auto_scale(self, texture: Optional[arcade.Texture]) -> float:
-        """Chuẩn hóa kích thước hạt theo Bounding Box (cạnh lớn nhất nằm trong khung 18x18 px)."""
+        """Auto-scale particle texture vừa khung bounding box 18x18 px."""
         if not texture:
             return 2.0
         w = float(getattr(texture, "width", 18.0) or 18.0)
@@ -152,7 +151,7 @@ class TrailEmitter:
         return 18.0 / max_dim
 
     def set_trail(self, trail: Union[Trail, str, None]) -> None:
-        """Chuyển đổi sang cấu hình vệt bay mới và nạp trước texture hạt nếu cần."""
+        """Set trail profile mới và preload particle texture nếu cần."""
         if isinstance(trail, str):
             trail = next((t for t in DEFAULT_TRAILS if t.id == trail), None)
 
@@ -177,7 +176,7 @@ class TrailEmitter:
             self.particle_scale = self.calculate_auto_scale(self.particle_texture)
 
     def _add_particle(self, sprite: arcade.Sprite) -> None:
-        """Thêm hạt mới vào danh sách kèm chính sách FIFO (giải phóng hạt cũ nhất khi vượt ngưỡng 50)."""
+        """Push particle mới với policy FIFO (drop hạt cũ nhất khi vượt MAX_PARTICLES)."""
         while len(self.particles) >= self.MAX_PARTICLES:
             oldest = self.particles[0]
             oldest.remove_from_sprite_lists()
@@ -196,8 +195,8 @@ class TrailEmitter:
         bird_sprite: Optional[arcade.Sprite] = None,
         **kwargs: Any,
     ) -> None:
-        """Cập nhật toàn bộ hạt hiện có và sinh hạt mới theo định kỳ khi bay."""
-        # 1. Cập nhật các hạt / bóng ma đang sống
+        """Update lifecycle toàn bộ particle và spawn particle định kỳ theo emit timer."""
+        # 1. Update active particles và ghost snapshots
         for p in list(self.particles):
             if isinstance(p, TrailParticle):
                 if not p.update_particle(dt):
@@ -218,7 +217,7 @@ class TrailEmitter:
             bird_texture = bird_sprite.texture
             bird_scale = getattr(bird_sprite, "scale", 1.0)
 
-        # 2. Sinh hạt mới nếu đang trang bị trail hoạt động
+        # 2. Spawn particles mới nếu equipped trail đang active
         if not self.current_trail or self.current_trail.trail_type == "none":
             return
 
@@ -272,11 +271,10 @@ class TrailEmitter:
         _world_speed: float = 180.0,
         **kwargs: Any,
     ) -> None:
-        """Kích hoạt phản hồi thị giác tức thì khi chim ấn nhảy (flap).
+        """Burst particle effect tức thì khi flap.
 
-        Sinh các hạt ngẫu nhiên xung quanh thân chim, không lùi về sau,
-        nổi nhẹ lên theo đà nhảy và tan biến cực nhanh (0.25s).
-        Loại vệt Ghost không sinh thêm khi nhảy.
+        Spawn các hạt xung quanh thân Bird, trôi nhẹ lên theo đà nhảy
+        và fade out nhanh (0.25s). Ghost trail không burst khi flap.
         """
         if not self.is_active or not self.current_trail or self.current_trail.trail_type != "particle" or not self.particle_texture:
             return
@@ -301,7 +299,7 @@ class TrailEmitter:
             self._add_particle(particle)
 
     def _get_vertical_velocity(self, trail_id: str) -> float:
-        """Tính vận tốc dọc phù hợp với từng chủ đề hạt."""
+        """Calculate vertical velocity theo từng trail theme."""
         if trail_id in ("fire", "fiery"):
             return random.uniform(20.0, 50.0)
         elif trail_id == "heart":
@@ -314,9 +312,9 @@ class TrailEmitter:
             return random.uniform(-10.0, 20.0)
 
     def draw(self) -> None:
-        """Vẽ toàn bộ hạt qua batch draw của SpriteList."""
+        """Draw toàn bộ particles qua batch draw của SpriteList."""
         self.particles.draw()
 
     def clear(self) -> None:
-        """Dọn dẹp sạch sẽ toàn bộ hạt trên màn hình."""
+        """Clear toàn bộ particles."""
         self.particles.clear()

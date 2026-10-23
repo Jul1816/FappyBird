@@ -17,10 +17,10 @@ from .services.storage import StorageService
 from .services.trail_manager import TrailManager
 from .tools.generate_placeholders import ensure_assets_exist
 
-# Cấu hình Nearest-Neighbor toàn cục cho mọi SpriteList
+# Global Nearest-Neighbor filtering cho mọi SpriteList
 arcade.SpriteList.DEFAULT_TEXTURE_FILTER = (gl.GL_NEAREST, gl.GL_NEAREST)
 
-# Patch DefaultTextureAtlas.resize để duy trì GL_NEAREST khi atlas mở rộng
+# Patch DefaultTextureAtlas.resize để giữ GL_NEAREST khi atlas resize
 _orig_atlas_resize = DefaultTextureAtlas.resize
 
 
@@ -35,7 +35,7 @@ DefaultTextureAtlas.resize = _nearest_atlas_resize
 
 class FlappyWindow(arcade.Window):
     def __init__(self, storage: Optional[StorageService] = None, visible: bool = True) -> None:
-        # Tự động tạo asset placeholder nếu thiếu trước khi engine khởi chạy (DX-1)
+        # Tự động generate placeholder assets nếu thiếu trước khi engine init
         ensure_assets_exist()
         ensure_retro_font_loaded()
 

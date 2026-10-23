@@ -23,7 +23,7 @@ class AudioService:
                 try:
                     self.sounds[name] = arcade.load_sound(file_path)
                 except Exception as e:
-                    logger.warning("Không thể nạp âm thanh %s: %s", file_path, e)
+                    logger.warning("Không thể load âm thanh %s: %s", file_path, e)
                     self.sounds[name] = None
             else:
                 self.sounds[name] = None
@@ -34,7 +34,7 @@ class AudioService:
             try:
                 arcade.play_sound(sound)
             except Exception as e:
-                logger.debug("Lỗi khi phát âm thanh %s: %s", name, e)
+                logger.debug("Lỗi khi play sound %s: %s", name, e)
 
     def play_wing(self) -> None:
         self.play("wing")

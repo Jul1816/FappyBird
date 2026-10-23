@@ -1,4 +1,4 @@
-"""Model dữ liệu lưu trữ tiến trình người chơi."""
+"""Data model cho player save progress."""
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -48,7 +48,7 @@ class SaveData:
         high_score = max(0, cls._safe_int(data.get("high_score", 0), 0))
         total_coins = max(0, cls._safe_int(data.get("total_coins_collected", 0), 0))
 
-        # 1. Khử trùng & nạp Skin
+        # 1. Sanitize & parse skin data
         equipped_skin = str(data.get("equipped_skin", "yellow") or "yellow")
         if equipped_skin in DEPRECATED_SKIN_IDS:
             equipped_skin = "yellow"
@@ -71,7 +71,7 @@ class SaveData:
         if equipped_skin not in unlocked_skins:
             equipped_skin = "yellow"
 
-        # 2. Khử trùng & nạp Trail (hỗ trợ di trú ID cũ custom -> primo, star -> money, fire -> fiery)
+        # 2. Sanitize & parse trail data (hỗ trợ migration từ legacy IDs)
         equipped_trail = str(data.get("equipped_trail", "none") or "none")
         equipped_trail = LEGACY_TRAIL_MAP.get(equipped_trail, equipped_trail)
 

@@ -1,4 +1,4 @@
-"""Định nghĩa dữ liệu Trail và danh mục vệt bay mặc định."""
+"""Data model cho Trail và catalog default trails."""
 from dataclasses import dataclass
 from typing import Literal
 
@@ -21,10 +21,10 @@ class Trail:
     description: str = ""
 
 
-# Thư mục sprite chứa các hạt vệt bay (ngang hàng với skins)
+# Assets directory chứa particle sprites của trail
 TRAILS_SPRITES_DIR = ASSETS_DIR / "trails"
 
-# Danh mục 7 trail khởi tạo (sắp xếp theo độ khó mở khóa tăng dần)
+# Catalog 7 default trails (sort theo unlock progression)
 DEFAULT_TRAILS: list[Trail] = [
     Trail(
         id="none",

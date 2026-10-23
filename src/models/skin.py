@@ -1,4 +1,4 @@
-"""Định nghĩa dữ liệu Skin và danh mục skin mặc định."""
+"""Data model cho Skin và catalog default skins."""
 from dataclasses import dataclass
 from typing import Literal
 
@@ -18,7 +18,7 @@ class Skin:
     description: str = ""
 
 
-# Danh mục 6 skin khởi tạo
+# Catalog 6 default skins
 DEFAULT_SKINS: list[Skin] = [
     Skin(
         id="yellow",
@@ -75,4 +75,3 @@ DEFAULT_SKINS: list[Skin] = [
         description="Heavenly angel robin.\nUnlocked by Default",
     ),
 ]
-

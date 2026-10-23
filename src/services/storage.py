@@ -1,4 +1,4 @@
-"""Dịch vụ lưu trữ và nạp dữ liệu tiến trình (SaveData)."""
+"""StorageService quản lý persist và load SaveData."""
 import json
 import logging
 import os
@@ -16,7 +16,7 @@ class StorageService:
         self.save_path = save_path or SAVE_FILE
 
     def load(self) -> SaveData:
-        """Nạp dữ liệu từ file JSON. Tự động fallback về mặc định nếu lỗi hoặc chưa có file."""
+        """Load save data từ file JSON. Tự động fallback về default SaveData nếu corrupt hoặc chưa có file."""
         if not self.save_path.exists():
             return SaveData()
 
@@ -29,7 +29,7 @@ class StorageService:
             return SaveData()
 
     def save(self, save_data: SaveData) -> bool:
-        """Ghi dữ liệu ra file JSON an toàn bằng cơ chế atomic write (.tmp -> rename)."""
+        """Save data ra file JSON qua atomic write (.tmp -> atomic rename)."""
         try:
             self.save_path.parent.mkdir(parents=True, exist_ok=True)
             temp_path = self.save_path.with_suffix(".tmp")
@@ -39,7 +39,7 @@ class StorageService:
                 f.flush()
                 os.fsync(f.fileno())
 
-            # Atomic replace (an toàn trên cả Windows lẫn Unix)
+            # Atomic replace an toàn trên cả Windows lẫn POSIX
             os.replace(temp_path, self.save_path)
             return True
         except OSError as e:

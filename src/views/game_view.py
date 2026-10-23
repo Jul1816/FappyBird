@@ -1,4 +1,4 @@
-"""GameView điều khiển vòng lặp chơi chính, va chạm, tính điểm và coin."""
+"""GameView điều khiển main game loop, physics, collisions, scoring và economy."""
 import arcade
 
 from ..constants import (
@@ -24,7 +24,7 @@ from .base_view import BaseView
 class GameView(BaseView):
     def __init__(self) -> None:
         super().__init__()
-        # Đối tượng môi trường
+        # Environment entities (Background & Floor)
         self.background = arcade.Sprite(ASSETS_DIR / "sprites" / "background-day.png")
         self.background.center_x = SCREEN_WIDTH / 2.0
         self.background.center_y = SCREEN_HEIGHT / 2.0
@@ -40,17 +40,17 @@ class GameView(BaseView):
         self.difficulty = DifficultyService()
         self.trail_emitter = TrailEmitter()
 
-        # Đối tượng chim
+        # Bird entity & SpriteList
         self.bird: Bird | None = None
         self.bird_list = arcade.SpriteList()
 
-        # Trạng thái gameplay
+        # Gameplay state
         self.score: int = 0
         self.coins_earned: int = 0
         self.accumulator: float = 0.0
         self.is_dead: bool = False
 
-        # Khởi tạo hiển thị điểm retro và các đối tượng arcade.Text
+        # Khởi tạo ScoreDisplay sprite font và arcade.Text UI elements
         self.score_display = ScoreDisplay()
         self.score_text = arcade.Text(
             "0",
@@ -81,13 +81,12 @@ class GameView(BaseView):
             font_size=6,
         )
 
-
     def on_show_view(self) -> None:
         super().on_show_view()
         self.reset_game()
 
     def reset_game(self) -> None:
-        """Khởi tạo lại trạng thái khi bắt đầu ván mới."""
+        """Reset game state khi start round mới."""
         self.score = 0
         self.coins_earned = 0
         self.accumulator = 0.0
@@ -96,7 +95,7 @@ class GameView(BaseView):
         self.score_text.text = "0"
         self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
 
-        # Khởi tạo chim với texture skin hiện tại
+        # Khởi tạo Bird với equipped skin texture
         texture = self.flappy_window.current_skin_texture
         self.bird = Bird(
             texture=texture,
@@ -110,7 +109,7 @@ class GameView(BaseView):
         self.pipe_manager.reset()
         self.difficulty.reset()
 
-        # Nạp Trail đang trang bị
+        # Load equipped Trail profile
         equipped_trail_id = getattr(self.flappy_window.save_data, "equipped_trail", "none")
         trail_obj = (
             self.flappy_window.trail_manager.get_trail(equipped_trail_id)
@@ -119,7 +118,7 @@ class GameView(BaseView):
         )
         self.trail_emitter.set_trail(trail_obj)
 
-        # Cho chim vỗ cánh cú đầu tiên và phát burst vệt bay
+        # Flap cú đầu tiên và emit burst trail particles
         self.bird.flap()
         self.trail_emitter.burst(
             self.bird.center_x,
@@ -134,7 +133,7 @@ class GameView(BaseView):
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         super().on_key_press(symbol, modifiers)
 
-        # 1. Nhảy / Vỗ cánh (Space hoặc Mũi tên lên)
+        # 1. Flap input (Space hoặc Arrow Up)
         if symbol in (arcade.key.SPACE, arcade.key.UP):
             if not self.is_dead and self.bird:
                 self.bird.flap()
@@ -149,18 +148,18 @@ class GameView(BaseView):
                 )
                 self.flappy_window.audio.play_wing()
 
-        # 2. Phím tắt Debug Mode (DX-2)
+        # 2. Debug Mode hotkeys
         elif symbol == arcade.key.F1:
-            # F1: +10 Coins để test
+            # F1: Add 10 Coins để test
             self.flappy_window.save_data.coins += 10
             self.flappy_window.save_data.total_coins_collected += 10
             self.flappy_window.save_progress()
             self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
         elif symbol == arcade.key.F2:
-            # F2: Bật/tắt vẽ Hitbox đỏ
+            # F2: Toggle debug hitbox overlay
             self.flappy_window.debug_hitbox = not self.flappy_window.debug_hitbox
         elif symbol == arcade.key.F3:
-            # F3: +10 Score để test độ khó và kỷ lục
+            # F3: Add 10 Score để test difficulty progression
             self.score += 10
             self.coins_earned += 2
             self.flappy_window.save_data.coins += 2
@@ -168,9 +167,8 @@ class GameView(BaseView):
             self.score_text.text = f"{self.score}"
             self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
         elif symbol == arcade.key.F4:
-            # F4: Bật/tắt God Mode
+            # F4: Toggle God Mode
             self.flappy_window.god_mode = not self.flappy_window.god_mode
-
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT:
@@ -191,7 +189,7 @@ class GameView(BaseView):
         dt = min(0.05, delta_time)
         self.accumulator += dt
 
-        # Fixed timestep accumulator (Hardening P1)
+        # Fixed timestep accumulator cho physics tick
         while self.accumulator >= FIXED_DT:
             self.physics_tick(FIXED_DT)
             self.accumulator -= FIXED_DT
@@ -201,15 +199,15 @@ class GameView(BaseView):
             return
 
         if not self.is_dead:
-            # Cập nhật độ khó qua Lerp
+            # Update difficulty curve qua lerp
             self.difficulty.update(dt, self.score)
             world_speed = self.difficulty.current_speed
             pipe_gap = self.difficulty.current_gap
 
-            # Cập nhật chim
+            # Update bird physics
             self.bird.update_physics(dt)
 
-            # Cập nhật vệt bay
+            # Update trail emitter
             self.trail_emitter.update(
                 dt,
                 world_speed,
@@ -220,13 +218,13 @@ class GameView(BaseView):
                 self.bird.scale,
             )
 
-            # Cập nhật sàn và ống
+            # Update floor scrolling và pipe spawning
             self.floor.update_scroll(dt, world_speed)
             if self.pipe_manager.can_spawn():
                 self.pipe_manager.spawn(pipe_gap)
             self.pipe_manager.update(dt, world_speed)
 
-            # Tính điểm khi bay qua ống
+            # Check score khi bird pass pipes
             pts = self.pipe_manager.check_score(self.bird.center_x)
             if pts > 0:
                 old_score = self.score
@@ -234,7 +232,7 @@ class GameView(BaseView):
                 self.score_display.set_score(self.score)
                 self.score_text.text = f"{self.score}"
                 self.flappy_window.audio.play_point()
-                # Cứ 5 điểm nhận 1 coin (tính theo mốc vượt qua để không sót khi pts > 1)
+                # Award coins: 5 score = 1 coin (tính theo mốc để tránh miss coin khi pts > 1)
                 new_coins = (self.score // SCORE_PER_COIN) - (old_score // SCORE_PER_COIN)
                 if new_coins > 0:
                     self.coins_earned += new_coins
@@ -242,22 +240,22 @@ class GameView(BaseView):
                     self.flappy_window.save_data.total_coins_collected += new_coins
                     self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
 
-            # Kiểm tra trần nhà
+            # Check ceiling boundary collision
             if self.bird.top >= SCREEN_HEIGHT:
                 self.bird.top = SCREEN_HEIGHT
                 self.bird.velocity_y = min(0.0, self.bird.velocity_y)
 
-            # Kiểm tra va chạm (Native Arcade check)
+            # Collision detection (Native Arcade)
             if not self.flappy_window.god_mode:
-                # 1. Va chạm sàn
+                # 1. Floor collision check
                 if arcade.check_for_collision(self.bird, self.floor) or self.bird.bottom <= FLOOR_HEIGHT:
                     self.die(crash_entity="floor")
-                # 2. Va chạm ống
+                # 2. Pipe collision check
                 elif arcade.check_for_collision_with_list(self.bird, self.pipe_manager.sprite_list):
                     self.die(crash_entity="pipe")
 
         else:
-            # Khi đã chết, chim tiếp tục rơi cắm đầu xuống đất trước khi hiện bảng Game Over
+            # Death state: bird dive xuống floor trước khi trigger game over
             self.bird.update_physics(dt)
             self.trail_emitter.update(
                 dt,
@@ -278,20 +276,20 @@ class GameView(BaseView):
         if crash_entity == "pipe":
             self.flappy_window.audio.play_die()
 
-        # Lưu High Score nếu phá kỷ lục
+        # Update high score nếu đạt record mới
         if self.score > self.flappy_window.save_data.high_score:
             self.flappy_window.save_data.high_score = self.score
 
-        # Tự động kiểm tra và mở khóa thành tựu skin & trail trước khi lưu
+        # Check và unlock skin/trail achievements trước khi save
         self.flappy_window.skin_manager.check_achievements(self.flappy_window.save_data)
         if hasattr(self.flappy_window, "trail_manager"):
             self.flappy_window.trail_manager.check_achievements(self.flappy_window.save_data)
 
-        # Lưu toàn bộ tiến trình (coin, highscore, unlocked_skins, unlocked_trails) ngay khi chết
+        # Persist save game (coins, high_score, unlocked items) khi bird chết
         self.flappy_window.save_progress()
 
     def trigger_game_over(self) -> None:
-        """Chuyển sang màn hình GameOverView."""
+        """Transition sang GameOverView."""
         from .game_over_view import GameOverView
 
         view = GameOverView(score=self.score, coins_earned=self.coins_earned)
@@ -300,34 +298,34 @@ class GameView(BaseView):
     def on_draw(self) -> None:
         super().on_draw()
 
-        # 1. Vẽ nền (SpriteList)
+        # 1. Draw background
         self.bg_list.draw()
 
-        # 2. Vẽ ống nước (SpriteList)
+        # 2. Draw pipes
         self.pipe_manager.sprite_list.draw()
 
-        # 3. Vẽ vệt bay (TrailEmitter)
+        # 3. Draw trail particles
         self.trail_emitter.draw()
 
-        # 4. Vẽ sàn (SpriteList)
+        # 4. Draw floor
         self.floor_list.draw()
 
-        # 5. Vẽ chim (SpriteList)
+        # 5. Draw bird
         self.bird_list.draw()
 
-        # 5. Vẽ UI (Điểm số retro sprite ở giữa trên, Coin ở góc phải trên)
+        # 6. Draw UI (Score sprite digits ở top-center, Coins ở top-right)
         self.score_display.draw()
         self.coins_text.draw()
 
-        # 6. Vẽ Debug Overlay nếu bật F2
+        # 7. Draw debug hitbox overlay nếu bật F2
         if self.flappy_window.debug_hitbox and self.bird:
-            # Vẽ Hitbox chim
+            # Draw Bird hitbox outline
             arcade.draw_polygon_outline(
                 self.bird.hit_box.get_adjusted_points(),
                 color=arcade.color.RED,
                 line_width=2,
             )
-            # Vẽ Hitbox ống
+            # Draw Pipe hitboxes outline
             for pipe in self.pipe_manager.sprite_list:
                 arcade.draw_polygon_outline(
                     pipe.hit_box.get_adjusted_points(),
@@ -335,7 +333,6 @@ class GameView(BaseView):
                     line_width=1,
                 )
 
-        # Hiển thị cờ God Mode nếu bật
+        # Render God Mode indicator nếu active
         if self.flappy_window.god_mode:
             self.god_mode_text.draw()
-

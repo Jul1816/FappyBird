@@ -205,4 +205,3 @@ class GameOverView(BaseView):
         arcade.draw_lrbt_rectangle_filled(s_left, s_right, s_bot, s_top, (35, 75, 120, 240))
         arcade.draw_lrbt_rectangle_outline(s_left, s_right, s_bot, s_top, (100, 180, 255, 255), 2)
         self.shop_btn_text.draw()
-

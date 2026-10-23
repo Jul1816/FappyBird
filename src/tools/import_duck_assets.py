@@ -1,4 +1,4 @@
-"""Công cụ sao chép và chuẩn hóa 5 texture vịt/phượng hoàng từ Desktop sang assets/skins/."""
+"""Tool import và chuẩn hóa 5 skin textures từ Desktop sang assets/skins/."""
 from pathlib import Path
 from PIL import Image
 
@@ -16,7 +16,7 @@ DUCK_ASSET_MAPPINGS = {
 
 
 def import_duck_skins(src_dir: Path = DUCKS_SRC_DIR, dst_dir: Path = ASSETS_DIR / "skins") -> None:
-    """Sao chép 5 texture mới vào assets/skins/ và bảo đảm định dạng RGBA."""
+    """Copy 5 skin textures vào assets/skins/ và đảm bảo format RGBA."""
     dst_dir.mkdir(parents=True, exist_ok=True)
 
     for src_filename, dst_filename in DUCK_ASSET_MAPPINGS.items():
@@ -24,7 +24,7 @@ def import_duck_skins(src_dir: Path = DUCKS_SRC_DIR, dst_dir: Path = ASSETS_DIR 
         dst_path = dst_dir / dst_filename
 
         if not src_path.exists():
-            raise FileNotFoundError(f"Không tìm thấy file nguồn: {src_path}")
+            raise FileNotFoundError(f"Source file not found: {src_path}")
 
         with Image.open(src_path) as img:
             rgba_img = img.convert("RGBA")

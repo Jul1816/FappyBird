@@ -146,11 +146,11 @@ class StartView(BaseView):
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT:
-            # Ánh xạ tọa độ chuột về thế giới ảo (Hardening P1)
+            # Unproject mouse coordinates sang virtual world coordinates
             vx, vy = self.unproject_mouse(x, y)
             sb_left, sb_right, sb_bot, sb_top = self.shop_button_bounds
 
-            # Nếu click vào nút Shop
+            # Click Shop button
             if sb_left <= vx <= sb_right and sb_bot <= vy <= sb_top:
                 self.open_shop()
             else:
@@ -200,4 +200,3 @@ class StartView(BaseView):
 
         
         self.coins_text.draw()
-
