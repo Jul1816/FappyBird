@@ -1,4 +1,4 @@
-"""Dịch vụ quản lý danh mục Trail, kiểm tra mở khóa thành tựu, mua và trang bị."""
+"""TrailManager quản lý trail catalog, unlock achievements và shop purchase/equip."""
 from typing import Optional
 
 from ..models.save_data import SaveData
@@ -16,7 +16,7 @@ class TrailManager:
         return next((t for t in self.trails if t.id == trail_id), None)
 
     def is_unlocked(self, trail: Trail, save_data: SaveData) -> bool:
-        """Kiểm tra trail đã được mở khóa chưa (hàm thuần khiết, không mutate save_data)."""
+        """Check trail đã unlock chưa (pure function, không mutate save_data)."""
         if trail.id in save_data.unlocked_trails:
             return True
         if trail.unlock_type == "default":
@@ -28,7 +28,7 @@ class TrailManager:
         return False
 
     def check_achievements(self, save_data: SaveData) -> list[Trail]:
-        """Tự động kiểm tra và mở khóa các trail đạt mốc thành tựu."""
+        """Check và unlock các trail đạt achievement milestones."""
         newly_unlocked: list[Trail] = []
         for trail in self.trails:
             if trail.id not in save_data.unlocked_trails and self.is_unlocked(trail, save_data):
@@ -37,7 +37,7 @@ class TrailManager:
         return newly_unlocked
 
     def can_buy(self, trail: Trail, save_data: SaveData) -> bool:
-        """Kiểm tra người chơi có đủ điều kiện mua trail bằng coin không."""
+        """Check player có đủ coin để mua trail không."""
         if trail.id in save_data.unlocked_trails:
             return False
         if trail.unlock_type != "coin":
@@ -45,7 +45,7 @@ class TrailManager:
         return save_data.coins >= trail.price
 
     def buy_trail(self, trail_id: str, save_data: SaveData) -> bool:
-        """Thực hiện mua trail bằng coin."""
+        """Xử lý mua trail bằng coin."""
         trail = self.get_trail(trail_id)
         if not trail or not self.can_buy(trail, save_data):
             return False
@@ -56,7 +56,7 @@ class TrailManager:
         return True
 
     def equip_trail(self, trail_id: str, save_data: SaveData) -> bool:
-        """Trang bị trail nếu đã sở hữu."""
+        """Equip trail nếu đã unlocked."""
         trail = self.get_trail(trail_id)
         if not trail or not self.is_unlocked(trail, save_data):
             return False

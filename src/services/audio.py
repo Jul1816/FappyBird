@@ -1,4 +1,4 @@
-"""Dịch vụ quản lý và phát hiệu ứng âm thanh (SFX)."""
+"""AudioService quản lý và play SFX."""
 import logging
 from pathlib import Path
 from typing import Optional
@@ -24,19 +24,19 @@ class AudioService:
                 try:
                     self.sounds[name] = arcade.load_sound(file_path)
                 except Exception as e:
-                    logger.warning("Không thể nạp âm thanh %s: %s", file_path, e)
+                    logger.warning("Không thể load âm thanh %s: %s", file_path, e)
                     self.sounds[name] = None
             else:
                 self.sounds[name] = None
 
     def play(self, name: str) -> None:
-        """Phát hiệu ứng âm thanh theo tên."""
+        """Play SFX theo sound name."""
         sound = self.sounds.get(name)
         if sound:
             try:
                 arcade.play_sound(sound)
             except Exception as e:
-                logger.debug("Lỗi khi phát âm thanh %s: %s", name, e)
+                logger.debug("Lỗi khi play sound %s: %s", name, e)
 
     def play_wing(self) -> None:
         self.play("wing")

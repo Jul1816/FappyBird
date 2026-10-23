@@ -1,4 +1,4 @@
-"""Công cụ tự động sinh sprite pixel art placeholder và chuẩn bị âm thanh."""
+"""Tool generate pixel art placeholder sprites và synthetic audio."""
 import math
 import os
 import shutil
@@ -12,19 +12,19 @@ from ..constants import ASSETS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 def create_pipe_texture(color_body=(115, 191, 46), color_highlight=(142, 221, 62), color_shadow=(85, 142, 34), color_border=(50, 80, 20)) -> Image.Image:
-    """Tạo sprite ống nước retro chuẩn 52x320 px với vành miệng ống (collar/lip)."""
+    """Generate pipe sprite chuẩn 52x320 px với collar/lip."""
     w, h = 52, 320
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
 
     lip_h = 24
-    # Vẽ thân ống (lip_h đến h)
+    # Draw pipe body (lip_h đến h)
     draw.rectangle([2, lip_h, w - 3, h - 1], fill=color_body, outline=color_border)
-    # Highlight & shadow thân
+    # Draw highlight & shadow cho pipe body
     draw.line([6, lip_h + 1, 6, h - 2], fill=color_highlight, width=3)
     draw.line([w - 6, lip_h + 1, w - 6, h - 2], fill=color_shadow, width=4)
 
-    # Vẽ vành miệng ống (collar)
+    # Draw pipe collar
     draw.rectangle([0, 0, w - 1, lip_h], fill=color_body, outline=color_border)
     draw.line([4, 1, 4, lip_h - 1], fill=color_highlight, width=3)
     draw.line([w - 4, 1, w - 4, lip_h - 1], fill=color_shadow, width=4)
@@ -33,16 +33,16 @@ def create_pipe_texture(color_body=(115, 191, 46), color_highlight=(142, 221, 62
 
 
 def create_background_day() -> Image.Image:
-    """Tạo nền ban ngày bầu trời xanh mây trắng và đồi cỏ 288x512."""
+    """Generate day background sprite (288x512)."""
     w, h = SCREEN_WIDTH, SCREEN_HEIGHT
     im = Image.new("RGBA", (w, h), (78, 192, 202, 255))
     draw = ImageDraw.Draw(im)
 
-    # Đồi xanh phía xa
+    # Background hills
     draw.ellipse([-50, 360, 180, 500], fill=(138, 208, 116, 255))
     draw.ellipse([100, 370, 340, 520], fill=(120, 192, 100, 255))
 
-    # Mây trắng pixel
+    # Pixel clouds
     for cx, cy in [(40, 100), (190, 70), (120, 180)]:
         draw.ellipse([cx, cy, cx + 50, cy + 25], fill=(240, 250, 255, 230))
         draw.ellipse([cx + 15, cy - 10, cx + 45, cy + 20], fill=(255, 255, 255, 255))
@@ -51,16 +51,16 @@ def create_background_day() -> Image.Image:
 
 
 def create_background_night() -> Image.Image:
-    """Tạo nền ban đêm bầu trời đen/lam đậm sao và trăng 288x512."""
+    """Generate night background sprite (288x512)."""
     w, h = SCREEN_WIDTH, SCREEN_HEIGHT
     im = Image.new("RGBA", (w, h), (11, 26, 44, 255))
     draw = ImageDraw.Draw(im)
 
-    # Mặt trăng
+    # Moon
     draw.ellipse([210, 50, 250, 90], fill=(245, 240, 200, 255))
     draw.ellipse([200, 45, 240, 85], fill=(11, 26, 44, 255))
 
-    # Đồi tối
+    # Night hills
     draw.ellipse([-50, 360, 180, 500], fill=(24, 48, 64, 255))
     draw.ellipse([100, 370, 340, 520], fill=(18, 38, 52, 255))
 
@@ -68,16 +68,16 @@ def create_background_night() -> Image.Image:
 
 
 def create_base_texture() -> Image.Image:
-    """Tạo sprite mặt đất cuộn ngang 336x112 với cỏ xanh và đất vàng."""
+    """Generate floor sprite 336x112 với repeating pattern."""
     w, h = 336, 112
     im = Image.new("RGBA", (w, h), (222, 216, 149, 255))
     draw = ImageDraw.Draw(im)
 
-    # Viền cỏ xanh trên cùng
+    # Top grass border
     draw.rectangle([0, 0, w - 1, 14], fill=(115, 191, 46, 255), outline=(50, 80, 20, 255))
     draw.line([0, 4, w - 1, 4], fill=(142, 221, 62, 255), width=2)
 
-    # Các sọc chéo họa tiết pixel của đất
+    # Ground diagonal stripe pattern
     for x in range(0, w, 16):
         draw.line([x, 15, x + 10, h - 1], fill=(210, 200, 130, 255), width=2)
 
@@ -85,7 +85,7 @@ def create_base_texture() -> Image.Image:
 
 
 def create_coin_texture() -> Image.Image:
-    """Tạo icon đồng xu vàng 24x24 pixel."""
+    """Generate coin icon sprite 24x24 px."""
     w, h = 24, 24
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
@@ -106,37 +106,37 @@ def create_bird_skin(
     beak_color: tuple[int, int, int],
     extra_feature: str = "",
 ) -> Image.Image:
-    """Tạo sprite chim pixel art căn giữa trong canvas `size`, giữ vùng thân ~34x24."""
+    """Generate bird skin sprite căn giữa canvas `size`, giữ body ~34x24 px."""
     w, h = size
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
 
-    # Tâm canvas
+    # Canvas center
     cx, cy = w // 2, h // 2
 
-    # Thân chim (bầu dục 32x22 quanh tâm)
+    # Bird body (ellipse 32x22 quanh center)
     bw, bh = 16, 11
     draw.ellipse([cx - bw, cy - bh, cx + bw, cy + bh], fill=body_color, outline=(40, 40, 40, 255), width=2)
     draw.ellipse([cx - bw + 4, cy + 2, cx + 4, cy + bh - 2], fill=belly_color)
 
-    # Cánh chim
+    # Wing
     draw.ellipse([cx - 10, cy - 3, cx + 2, cy + 6], fill=wing_color, outline=(40, 40, 40, 255), width=1)
 
-    # Mắt to tròn trắng + con ngươi đen
+    # Eye & pupil
     eye_x, eye_y = cx + 8, cy - 4
     draw.ellipse([eye_x - 4, eye_y - 4, eye_x + 4, eye_y + 4], fill=(255, 255, 255, 255), outline=(0, 0, 0, 255))
     draw.ellipse([eye_x + 1, eye_y - 2, eye_x + 3, eye_y], fill=(0, 0, 0, 255))
 
-    # Mỏ cam nhọn hướng về bên phải
+    # Beak
     draw.polygon([(cx + 12, cy - 2), (cx + 18, cy + 2), (cx + 12, cy + 5)], fill=beak_color, outline=(40, 40, 40, 255))
 
-    # Tính năng đặc biệt (Phụ kiện / Visor / Vương miện)
+    # Extra accessories (Visor / Crown)
     if extra_feature == "cyber":
-        # Visor kính công nghệ xanh neon
+        # Cyan neon visor
         draw.rectangle([eye_x - 6, eye_y - 3, eye_x + 5, eye_y + 3], fill=(0, 255, 200, 230), outline=(0, 180, 150, 255))
         draw.line([cx - bw, cy, cx - 2, cy], fill=(0, 255, 200, 255), width=2)
     elif extra_feature == "crown":
-        # Vương miện vàng ngọc đỏ trên đầu
+        # Golden crown với ruby gem
         top_y = cy - bh
         draw.polygon(
             [(cx - 6, top_y), (cx - 8, top_y - 7), (cx - 3, top_y - 4), (cx, top_y - 9), (cx + 3, top_y - 4), (cx + 8, top_y - 7), (cx + 6, top_y)],
@@ -149,7 +149,7 @@ def create_bird_skin(
 
 
 def generate_synthesized_wav(filepath: Path, duration: float = 0.15, freq: float = 440.0, volume: float = 0.5) -> None:
-    """Tạo file wav âm thanh đơn giản bằng thư viện chuẩn wave nếu thiếu file audio."""
+    """Synthesize fallback wav file qua standard library `wave`."""
     sample_rate = 22050
     n_samples = int(sample_rate * duration)
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -162,7 +162,7 @@ def generate_synthesized_wav(filepath: Path, duration: float = 0.15, freq: float
         data = bytearray()
         for i in range(n_samples):
             t = float(i) / sample_rate
-            # Sine wave kết hợp decay
+            # Sine wave decay envelope
             envelope = math.exp(-3.0 * t / duration)
             sample_val = int(32767.0 * volume * envelope * math.sin(2.0 * math.pi * freq * t))
             sample_val = max(-32768, min(32767, sample_val))
@@ -172,7 +172,7 @@ def generate_synthesized_wav(filepath: Path, duration: float = 0.15, freq: float
 
 
 def ensure_audio_files(audio_dir: Path) -> None:
-    """Sao chép audio từ thư mục tham khảo (nếu có FLAPPY_REF_AUDIO_DIR), hoặc tự tổng hợp wav fallback."""
+    """Copy audio từ reference directory (nếu có FLAPPY_REF_AUDIO_DIR) hoặc synthesize fallback wav."""
     audio_dir.mkdir(parents=True, exist_ok=True)
     ref_audio_env = os.environ.get("FLAPPY_REF_AUDIO_DIR")
     ref_audio_dir = Path(ref_audio_env) if ref_audio_env else None
@@ -189,38 +189,38 @@ def ensure_audio_files(audio_dir: Path) -> None:
         if dest.exists() and dest.stat().st_size > 0:
             continue
 
-        # Thử copy từ source tham khảo nếu được cấu hình
+        # Copy từ reference source nếu tồn tại
         if ref_audio_dir is not None and (ref_audio_dir / sfx_name).exists():
             shutil.copy2(ref_audio_dir / sfx_name, dest)
         else:
-            # Fallback tạo tiếng bíp điện tử chuẩn
+            # Fallback: synthesize electronic beep
             generate_synthesized_wav(dest, duration=0.18, freq=freq)
 
 
 def create_star_particle_texture() -> Image.Image:
-    """Tạo sprite hạt sao vàng 8x8 pixel."""
+    """Generate star particle sprite 8x8 px."""
     w, h = 8, 8
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
-    # Thân sao vàng
+    # Star body
     draw.rectangle([3, 1, 4, 6], fill=(255, 215, 0, 255))
     draw.rectangle([1, 3, 6, 4], fill=(255, 215, 0, 255))
     draw.rectangle([2, 2, 5, 5], fill=(255, 235, 50, 255))
-    # Điểm sáng tâm
+    # Center highlight
     draw.point((3, 3), fill=(255, 255, 255, 255))
     draw.point((4, 3), fill=(255, 255, 255, 255))
     return im
 
 
 def create_heart_particle_texture() -> Image.Image:
-    """Tạo sprite hạt tim hồng 8x8 pixel."""
+    """Generate heart particle sprite 8x8 px."""
     w, h = 8, 8
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
-    # 2 tai tim
+    # Heart lobes
     draw.rectangle([1, 1, 2, 3], fill=(255, 80, 130, 255))
     draw.rectangle([5, 1, 6, 3], fill=(255, 80, 130, 255))
-    # Thân tim
+    # Heart body
     draw.rectangle([2, 1, 5, 4], fill=(255, 60, 110, 255))
     draw.rectangle([2, 4, 5, 5], fill=(255, 50, 100, 255))
     draw.rectangle([3, 6, 4, 6], fill=(230, 40, 80, 255))
@@ -231,42 +231,42 @@ def create_heart_particle_texture() -> Image.Image:
 
 
 def create_fire_particle_texture() -> Image.Image:
-    """Tạo sprite hạt lửa đỏ cam 8x8 pixel."""
+    """Generate fire particle sprite 8x8 px."""
     w, h = 8, 8
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
-    # Đế lửa đỏ đậm
+    # Fire base
     draw.rectangle([2, 5, 5, 7], fill=(220, 40, 20, 255))
-    # Thân lửa cam
+    # Flame body
     draw.rectangle([2, 3, 5, 5], fill=(255, 120, 20, 255))
     draw.rectangle([3, 1, 4, 3], fill=(255, 200, 40, 255))
-    # Nhân trắng sáng
+    # Flame core highlight
     draw.rectangle([3, 4, 4, 5], fill=(255, 255, 180, 255))
     return im
 
 
 def create_custom_trail_placeholder() -> Image.Image:
-    """Tạo sprite placeholder cho Custom Trail (viên ngọc tím 16x16 pixel)."""
+    """Generate placeholder sprite cho Custom Trail (16x16 px)."""
     w, h = 16, 16
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
-    # Hình thoi kim cương tím neon
+    # Diamond polygon
     diamond = [(8, 1), (14, 8), (8, 14), (2, 8)]
     draw.polygon(diamond, fill=(160, 60, 240, 255), outline=(100, 20, 180, 255))
     inner = [(8, 3), (12, 8), (8, 12), (4, 8)]
     draw.polygon(inner, fill=(200, 110, 255, 255))
-    # Điểm sáng trung tâm
+    # Center sparkle
     draw.rectangle([7, 7, 9, 9], fill=(255, 230, 255, 255))
     return im
 
 
 def generate_trail_sprites(trails_dir: Path | None = None, overwrite: bool = False) -> None:
-    """Tạo các sprite hạt vệt bay pixel art vào thư mục assets/trails/ nếu chưa tồn tại."""
+    """Generate trail particle sprites vào assets/trails/ nếu chưa tồn tại."""
     target_dir = trails_dir or (ASSETS_DIR / "trails")
     target_dir.mkdir(parents=True, exist_ok=True)
 
     def _save_if(img: Image.Image, path: Path) -> None:
-        # Không bao giờ ghi đè sprite custom thật đã tồn tại
+        # Never overwrite existing custom sprites
         if not path.exists():
             img.save(path)
 
@@ -277,7 +277,7 @@ def generate_trail_sprites(trails_dir: Path | None = None, overwrite: bool = Fal
 
 
 def generate_all_assets(overwrite: bool = False) -> None:
-    """Tạo toàn bộ placeholder assets cho game nếu chưa có (mặc định không ghi đè)."""
+    """Generate toàn bộ placeholder assets cho game nếu thiếu."""
     sprites_dir = ASSETS_DIR / "sprites"
     skins_dir = ASSETS_DIR / "skins"
     trails_dir = ASSETS_DIR / "trails"
@@ -292,7 +292,7 @@ def generate_all_assets(overwrite: bool = False) -> None:
         if overwrite or not path.exists():
             img.save(path)
 
-    # 1. Sprites môi trường
+    # 1. Environment sprites
     _save_if(create_background_day(), sprites_dir / "background-day.png")
     _save_if(create_background_night(), sprites_dir / "background-night.png")
     _save_if(create_base_texture(), sprites_dir / "base.png")
@@ -303,7 +303,7 @@ def generate_all_assets(overwrite: bool = False) -> None:
     )
     _save_if(create_coin_texture(), sprites_dir / "coin.png")
 
-    # 2. Skins chim (Kích thước linh hoạt, thân chim chuẩn)
+    # 2. Bird skins (dynamic canvas, standard body)
     _save_if(
         create_bird_skin((34, 24), body_color=(250, 200, 40), belly_color=(255, 230, 120), wing_color=(240, 120, 40), beak_color=(255, 100, 0)),
         skins_dir / "classic.png",
@@ -325,16 +325,16 @@ def generate_all_assets(overwrite: bool = False) -> None:
         skins_dir / "golden_bird.png",
     )
 
-    # 3. Trails sprites (ngang hàng với skins)
+    # 3. Trail sprites
     generate_trail_sprites(trails_dir, overwrite=overwrite)
 
-    # 4. Âm thanh
+    # 4. SFX audio files
     ensure_audio_files(audio_dir)
     print("Assets ensured successfully!")
 
 
 def ensure_assets_exist(overwrite: bool = False) -> None:
-    """Tự động kiểm tra và sinh asset nếu thiếu mà không ghi đè tài nguyên hiện có."""
+    """Auto-check và generate assets nếu thiếu mà không overwrite tài nguyên hiện có."""
     import sys
     if getattr(sys, "frozen", False):
         return
@@ -349,11 +349,9 @@ def ensure_assets_exist(overwrite: bool = False) -> None:
     if any(not f.exists() for f in required_files):
         generate_all_assets(overwrite=overwrite)
 
-    # Đảm bảo thư mục trail sprites luôn có sẵn các sprite cơ bản
+    # Đảm bảo thư mục trail sprites luôn có sẵn basic sprites
     generate_trail_sprites(ASSETS_DIR / "trails", overwrite=False)
 
 
 if __name__ == "__main__":
     generate_all_assets()
-
-

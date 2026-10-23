@@ -1,4 +1,4 @@
-"""Thực thể Bird với Hitbox chuẩn hóa bất biến và động học bay/rơi."""
+"""Bird entity với standard fixed hitbox và flight/gravity physics."""
 from typing import Optional
 
 import arcade
@@ -26,7 +26,7 @@ class Bird(arcade.Sprite):
         center_y: float = 0.0,
         **kwargs,
     ) -> None:
-        # Tự động tính scale sao cho chiều cao hiển thị luôn = STANDARD_HITBOX_HEIGHT (24.0 px)
+        # Auto-scale theo chiều cao chuẩn STANDARD_HITBOX_HEIGHT (24.0 px)
         if scale is None:
             if texture is not None and getattr(texture, "height", 0) > 0:
                 scale = STANDARD_HITBOX_HEIGHT / float(texture.height)
@@ -41,17 +41,17 @@ class Bird(arcade.Sprite):
             **kwargs,
         )
 
-        # Chuẩn hóa Hitbox bất biến: cố định 34x24 px bất chấp kích thước texture
+        # Chuẩn hóa hitbox cố định 34x24 px bất chấp texture size
         hw = STANDARD_HITBOX_WIDTH / 2.0
         hh = STANDARD_HITBOX_HEIGHT / 2.0
         standard_points = [(-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh)]
         self.hit_box = hb.RotatableHitBox(standard_points, position=self.position)
 
-        # Vận tốc theo trục Y
+        # Y velocity
         self.velocity_y: float = 0.0
 
     def set_skin_texture(self, texture: Optional[arcade.Texture]) -> None:
-        """Cập nhật texture mới cho chim và tự động cân chỉnh scale phù hợp."""
+        """Update skin texture cho Bird và auto-scale tương ứng."""
         if texture is not None:
             self.texture = texture
             if getattr(texture, "height", 0) > 0:
@@ -59,7 +59,7 @@ class Bird(arcade.Sprite):
             else:
                 self.scale = 1.0
 
-            # Phòng vệ: Tái khẳng định Hitbox chuẩn 34x24 px tâm (0, 0)
+            # Reset hitbox chuẩn 34x24 px quanh origin (0, 0)
             hw = STANDARD_HITBOX_WIDTH / 2.0
             hh = STANDARD_HITBOX_HEIGHT / 2.0
             standard_points = [(-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh)]
@@ -67,19 +67,18 @@ class Bird(arcade.Sprite):
         else:
             self.scale = 1.0
 
-
     def flap(self) -> None:
-        """Thực hiện cú nhảy (vỗ cánh): gán vận tốc hướng lên và ngửa góc."""
+        """Thực hiện flap: set positive Y velocity và ngửa góc xoay."""
         self.velocity_y = FLAP_VELOCITY
         self.angle = ROT_FLAP
 
     def update_physics(self, dt: float) -> None:
-        """Cập nhật trọng lực, tọa độ và góc xoay qua từng bước thời gian dt."""
-        # 1. Trọng lực & Giới hạn tốc độ rơi
+        """Update physics (gravity, vị trí Y, rotation angle) theo dt."""
+        # 1. Apply gravity & clamp terminal velocity
         self.velocity_y = max(TERMINAL_VELOCITY, self.velocity_y + GRAVITY * dt)
         self.center_y += self.velocity_y * dt
 
-        # 2. Xoay góc (Chúc đầu xuống khi rơi)
+        # 2. Rotate angle (dive angle khi rơi)
         if self.velocity_y < 0:
             self.angle = max(ROT_MIN, min(ROT_MAX, self.angle + ROT_VEL * dt))
         else:

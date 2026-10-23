@@ -1,4 +1,4 @@
-"""Dịch vụ đường cong độ khó (Difficulty Curve) với Lerp liên tục."""
+"""Difficulty curve service sử dụng continuous lerp."""
 from ..constants import (
     INITIAL_PIPE_GAP,
     INITIAL_PIPE_SPEED,
@@ -14,9 +14,9 @@ class DifficultyService:
         self.current_gap: float = INITIAL_PIPE_GAP
 
     def get_target_difficulty(self, score: int) -> tuple[float, float]:
-        """Tính toán mục tiêu (target_speed, target_gap) bằng nội suy tuyến tính dựa theo score.
+        """Calculate target (target_speed, target_gap) qua linear interpolation dựa theo score.
 
-        Các mốc độ khó chuẩn:
+        Milestones chuẩn:
         - score <= 0: (180.0, 150.0)
         - 0 < score < 10: lerp từ (180, 150) lên (220, 135)
         - 10 <= score < 25: lerp từ (220, 135) lên (260, 120)
@@ -38,7 +38,7 @@ class DifficultyService:
             return (MAX_PIPE_SPEED, MIN_PIPE_GAP)
 
     def update(self, dt: float, score: int) -> None:
-        """Cập nhật các giá trị tốc độ và khoảng hở hiện tại mượt mà qua lerp."""
+        """Update pipe speed và gap size hiện tại qua lerp theo delta_time."""
         target_speed, target_gap = self.get_target_difficulty(score)
         factor = min(1.0, LERP_SPEED_FACTOR * dt)
 
@@ -47,6 +47,6 @@ class DifficultyService:
         self.current_gap += (target_gap - self.current_gap) * factor
 
     def reset(self) -> None:
-        """Đặt lại độ khó ban đầu khi bắt đầu ván mới."""
+        """Reset difficulty về giá trị khởi tạo khi restart game."""
         self.current_speed = INITIAL_PIPE_SPEED
         self.current_gap = INITIAL_PIPE_GAP

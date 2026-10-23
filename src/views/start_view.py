@@ -1,4 +1,4 @@
-"""StartView: Màn hình chào mừng, hiển thị kỷ lục, chim lắc lư SHM và nút vào Shop."""
+"""StartView: Start screen hiển thị high score, bird bobbing SHM animation và Shop button."""
 import math
 
 import arcade
@@ -32,23 +32,23 @@ class StartView(BaseView):
         self.bird_list = arcade.SpriteList()
         self.time: float = 0.0
 
-        # Tọa độ nút Shop (để click chuột unproject)
+        # Shop button bounds (unprojected mouse click)
         self.shop_button_bounds = (
-            SCREEN_WIDTH / 2.0 - 70.0,  # left (rộng 140px chứa gọn text retro)
+            SCREEN_WIDTH / 2.0 - 70.0,  # left (140px width)
             SCREEN_WIDTH / 2.0 + 70.0,  # right
             70.0,                        # bottom
             105.0,                       # top
         )
         sb_bot, sb_top = self.shop_button_bounds[2], self.shop_button_bounds[3]
 
-        # Sprite thông điệp chào mừng (Get Ready / Flappy Bird retro)
+        # Retro welcome message sprite
         self.message_sprite = arcade.Sprite(ASSETS_DIR / "sprites" / "message.png")
         self.message_sprite.center_x = SCREEN_WIDTH / 2.0
         self.message_sprite.center_y = 310.0
         self.message_list = arcade.SpriteList()
         self.message_list.append(self.message_sprite)
 
-        # Khởi tạo các đối tượng arcade.Text cố định (font_size=6 chuẩn 1-bit pixel art)
+        # Khởi tạo arcade.Text UI elements (font_size=6 cho pixel art typography)
         self.title_text = arcade.Text(
             "FLAPPY BIRD",
             SCREEN_WIDTH / 2.0,
@@ -106,12 +106,12 @@ class StartView(BaseView):
         self.time = 0.0
         self.floor.reset()
 
-        # Cập nhật nội dung text theo dữ liệu save_data hiện tại
+        # Update text content theo save_data hiện tại
         best_score = self.flappy_window.save_data.high_score
         self.best_score_text.text = f"BEST: {best_score}"
         self.coins_text.text = f"COINS: {self.flappy_window.save_data.coins}"
 
-        # Chim thực tế nằm chính giữa vị trí icon chim đã xóa trên message.png (X=142.0, Y=259.0)
+        # Bird position căn giữa message.png (X=142.0, Y=259.0)
         texture = self.flappy_window.current_skin_texture
         self.bird = Bird(
             texture=texture,
@@ -123,14 +123,14 @@ class StartView(BaseView):
 
     def on_update(self, delta_time: float) -> None:
         self.time += delta_time
-        # Cuộn sàn nhẹ
+        # Floor idle scroll
         self.floor.update_scroll(delta_time, 80.0)
 
-        # Hiệu ứng nhấp nháy chữ Space
+        # Prompt text pulse animation
         alpha = int(180 + 75 * math.sin(self.time * 6.0))
         self.prompt_text.color = (255, 255, 255, alpha)
 
-        # Chim lắc lư điều hòa (SHM) ngay tại vị trí trung tâm hướng dẫn
+        # Bird SHM bobbing animation
         if self.bird:
             self.bird.center_x = 142.0
             self.bird.center_y = 259.0 + math.sin(self.time * 5.0) * 7.0
@@ -146,11 +146,11 @@ class StartView(BaseView):
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT:
-            # Ánh xạ tọa độ chuột về thế giới ảo (Hardening P1)
+            # Unproject mouse coordinates sang virtual world coordinates
             vx, vy = self.unproject_mouse(x, y)
             sb_left, sb_right, sb_bot, sb_top = self.shop_button_bounds
 
-            # Nếu click vào nút Shop
+            # Click Shop button
             if sb_left <= vx <= sb_right and sb_bot <= vy <= sb_top:
                 self.open_shop()
             else:
@@ -171,15 +171,15 @@ class StartView(BaseView):
     def on_draw(self) -> None:
         super().on_draw()
 
-        # Vẽ các Sprite bằng SpriteList (chuẩn Arcade 3.3)
+        # Batch draw sprites via SpriteList
         self.bg_list.draw()
         self.message_list.draw()
         self.bird_list.draw()
 
-        # Highscore ở trên cùng
+        # Draw high score at top
         self.best_score_text.draw()
 
-        # Nút SHOP & SKINS
+        # Draw Shop button
         sb_left, sb_right, sb_bot, sb_top = self.shop_button_bounds
         arcade.draw_lrbt_rectangle_filled(
             sb_left,
@@ -198,6 +198,5 @@ class StartView(BaseView):
         )
         self.shop_btn_text.draw()
 
-        # Hiển thị số Coin ở góc phải trên
+        # Draw coins counter ở top-right
         self.coins_text.draw()
-

@@ -1,4 +1,4 @@
-"""BaseView quản lý Camera2D ảo (288x512), Letterbox và F11 Fullscreen."""
+"""BaseView quản lý virtual Camera2D (288x512), letterbox viewport và F11 fullscreen."""
 from typing import TYPE_CHECKING, Tuple
 
 import arcade
@@ -21,7 +21,7 @@ class BaseView(arcade.View):
         return self.window  # type: ignore
 
     def on_show_view(self) -> None:
-        """Kích hoạt khi chuyển sang view này."""
+        """Hook khi switch sang view này."""
         if not self._camera:
             self._camera = Camera2D(window=self.window)
         if self.window and hasattr(self.window, "ctx") and hasattr(self.window.ctx, "default_atlas") and self.window.ctx.default_atlas:
@@ -30,7 +30,7 @@ class BaseView(arcade.View):
         self.update_camera()
 
     def update_camera(self, width: int | None = None, height: int | None = None) -> None:
-        """Tính toán tỷ lệ Letterbox/Pillarbox và gán viewport ảo 288x512."""
+        """Calculate letterbox/pillarbox aspect ratio và set virtual viewport 288x512."""
         if not self._camera:
             return
 
@@ -58,19 +58,19 @@ class BaseView(arcade.View):
         self._camera.scissor = vp_rect
 
     def on_resize(self, width: int, height: int) -> None:
-        """Tự động tính lại letterbox khi cửa sổ thay đổi kích thước."""
+        """Recalculate letterbox viewport khi window resize."""
         super().on_resize(width, height)
         self.update_camera(width, height)
 
     def unproject_mouse(self, x: float, y: float) -> Tuple[float, float]:
-        """Ánh xạ tọa độ chuột từ pixel màn hình thực sang tọa độ thế giới ảo 288x512."""
+        """Unproject mouse coordinates từ screen pixel sang virtual world coordinates (288x512)."""
         if not self._camera:
             return x, y
         vec = self._camera.unproject((x, y))
         return vec.x, vec.y
 
     def on_draw(self) -> None:
-        """Xóa toàn bộ viền màn hình màu đen và kích hoạt camera chiếu thế giới ảo."""
+        """Clear buffer viền đen và activate virtual camera."""
         self.window.ctx.scissor = None
         self.window.ctx.viewport = (0, 0, self.window.width, self.window.height)
         self.clear(color=(0, 0, 0, 255))
@@ -78,7 +78,7 @@ class BaseView(arcade.View):
             self._camera.use()
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
-        """Hỗ trợ phím tắt F11 chuyển đổi Fullscreen toàn cục."""
+        """Toggle fullscreen với shortcut F11."""
         if symbol == arcade.key.F11:
             self.window.set_fullscreen(not self.window.fullscreen)
             self.update_camera()

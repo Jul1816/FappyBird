@@ -1,4 +1,4 @@
-"""ShopView: Màn hình Shop duyệt skin và trail, xem trước hình ảnh, mua và trang bị."""
+"""ShopView: Shop screen duyệt skin và trail, live preview, buy và equip."""
 import math
 from typing import Literal, Optional
 
@@ -40,7 +40,7 @@ class ShopView(BaseView):
         self.bg_list.append(self.background)
         self.bg_list.append(self.floor)
 
-        # Cache các texture sprite của skins
+        # Cache texture sprites cho skins
         self.skin_textures: dict[str, arcade.Texture] = {}
         for s in self.skins:
             try:
@@ -48,7 +48,7 @@ class ShopView(BaseView):
             except Exception:
                 self.skin_textures[s.id] = arcade.load_texture(ASSETS_DIR / "skins" / "yellow.png")
 
-        # Sprite xem trước trong Shop
+        # Preview sprite trong shop
         self.preview_sprite = arcade.Sprite()
         self.preview_sprite.scale = 1.5
         self.preview_sprite.center_x = SCREEN_WIDTH / 2.0
@@ -57,18 +57,18 @@ class ShopView(BaseView):
         self.preview_list = arcade.SpriteList()
         self.preview_list.append(self.preview_sprite)
 
-        # Trail Emitter xem trước hiệu ứng vệt bay (chế độ preview: sinh hạt dày và sống lâu)
+        # TrailEmitter cho preview panel (preview mode: particle rate cao hơn)
         self.trail_emitter = TrailEmitter(active_trail_id="none", is_active=False, preview_mode=True)
 
         self.time: float = 0.0
 
-        # Vùng click các nút UI (unprojected mouse bounds: x_min, x_max, y_min, y_max)
+        # UI button click bounds (unprojected mouse bounds: x_min, x_max, y_min, y_max)
         self.tab_skins_bounds = (15.0, 135.0, 452.0, 482.0)
         self.tab_trails_bounds = (153.0, 273.0, 452.0, 482.0)
-        self.btn_prev = (25.0, 65.0, 275.0, 325.0)    # Nút [<]
-        self.btn_next = (223.0, 263.0, 275.0, 325.0)  # Nút [>]
-        self.btn_action = (SCREEN_WIDTH / 2.0 - 75.0, SCREEN_WIDTH / 2.0 + 75.0, 135.0, 175.0) # Nút Mua/Trang bị (rộng 150px)
-        self.btn_back = (SCREEN_WIDTH / 2.0 - 70.0, SCREEN_WIDTH / 2.0 + 70.0, 45.0, 80.0)      # Nút Trở về (rộng 140px chứa gọn "[ ESC ] BACK")
+        self.btn_prev = (25.0, 65.0, 275.0, 325.0)    # Button Prev [<]
+        self.btn_next = (223.0, 263.0, 275.0, 325.0)  # Button Next [>]
+        self.btn_action = (SCREEN_WIDTH / 2.0 - 75.0, SCREEN_WIDTH / 2.0 + 75.0, 135.0, 175.0) # Button Buy/Equip action (150px)
+        self.btn_back = (SCREEN_WIDTH / 2.0 - 70.0, SCREEN_WIDTH / 2.0 + 70.0, 45.0, 80.0)      # Button Back (140px)
 
         tab_s_cx = (self.tab_skins_bounds[0] + self.tab_skins_bounds[1]) / 2.0
         tab_t_cx = (self.tab_trails_bounds[0] + self.tab_trails_bounds[1]) / 2.0
@@ -76,7 +76,7 @@ class ShopView(BaseView):
         act_cy = (self.btn_action[2] + self.btn_action[3]) / 2.0
         b_cy = (self.btn_back[2] + self.btn_back[3]) / 2.0
 
-        # Khởi tạo các đối tượng arcade.Text với font pixel retro
+        # Khởi tạo arcade.Text UI elements với retro pixel font
         self.tab_skins_text = arcade.Text(
             "[ 1: SKINS ]",
             tab_s_cx,
@@ -201,7 +201,7 @@ class ShopView(BaseView):
             self.selected_trail_index = val
 
     def switch_tab(self, tab: Literal["skins", "trails"]) -> None:
-        """Chuyển đổi giữa 2 tab SKINS và TRAILS."""
+        """Switch tab giữa SKINS và TRAILS."""
         if tab in ("skins", "trails") and self.current_tab != tab:
             self.current_tab = tab
             self.update_preview_texture()
@@ -210,11 +210,11 @@ class ShopView(BaseView):
                 self.flappy_window.audio.play_swoosh()
 
     def update_ui_texts(self) -> None:
-        """Cập nhật nội dung các text động khi chuyển đổi hoặc mua skin/trail."""
+        """Update dynamic UI texts khi switch tab hoặc buy/equip."""
         save_data = self.flappy_window.save_data
         self.coins_text.text = f"COINS: {save_data.coins}"
 
-        # Cập nhật màu tab
+        # Update tab colors
         if self.current_tab == "skins":
             self.tab_skins_text.color = arcade.color.WHITE
             self.tab_trails_text.color = (140, 155, 175, 255)
@@ -283,7 +283,7 @@ class ShopView(BaseView):
                 self.selected_trail_index = idx
                 break
 
-        # Tự động kiểm tra thành tựu mở khóa nếu đủ điều kiện
+        # Check và unlock achievements nếu đạt condition
         self.skin_manager.check_achievements(save_data)
         self.trail_manager.check_achievements(save_data)
         self.flappy_window.save_progress()
@@ -310,17 +310,17 @@ class ShopView(BaseView):
             else:
                 self.preview_sprite.scale = 1.5
 
-        # Cập nhật trail emitter cho khung xem trước
+        # Update trail emitter cho preview box
         self.trail_emitter.set_trail(trail_id)
         self.trail_emitter.is_active = (trail_id != "none")
 
     def on_update(self, delta_time: float) -> None:
         self.time += delta_time
-        # Chim xem trước lắc lư sinh động
+        # Bobbing animation cho preview sprite
         self.preview_sprite.center_y = 300.0 + math.sin(self.time * 4.0) * 5.0
         self.preview_sprite.angle = math.sin(self.time * 4.0) * 6.0
 
-        # Cập nhật vệt bay xem trước với vận tốc trôi nhẹ sang trái tạo dải dài
+        # Update preview trail emitter với drift velocity
         if self.trail_emitter.is_active:
             dt = min(0.05, delta_time)
             self.trail_emitter.update(
@@ -351,7 +351,7 @@ class ShopView(BaseView):
         if button == arcade.MOUSE_BUTTON_LEFT:
             vx, vy = self.unproject_mouse(x, y)
 
-            # 0. Chuyển Tab
+            # 0. Switch tab
             if self.tab_skins_bounds[0] <= vx <= self.tab_skins_bounds[1] and self.tab_skins_bounds[2] <= vy <= self.tab_skins_bounds[3]:
                 self.switch_tab("skins")
                 return
@@ -359,22 +359,22 @@ class ShopView(BaseView):
                 self.switch_tab("trails")
                 return
 
-            # 1. Nút Prev [<]
+            # 1. Click Prev button
             if self.btn_prev[0] <= vx <= self.btn_prev[1] and self.btn_prev[2] <= vy <= self.btn_prev[3]:
                 self.prev_item()
                 return
 
-            # 2. Nút Next [>]
+            # 2. Click Next button
             if self.btn_next[0] <= vx <= self.btn_next[1] and self.btn_next[2] <= vy <= self.btn_next[3]:
                 self.next_item()
                 return
 
-            # 3. Nút Mua / Trang bị
+            # 3. Click Buy/Equip button
             if self.btn_action[0] <= vx <= self.btn_action[1] and self.btn_action[2] <= vy <= self.btn_action[3]:
                 self.perform_action()
                 return
 
-            # 4. Nút Back
+            # 4. Click Back button
             if self.btn_back[0] <= vx <= self.btn_back[1] and self.btn_back[2] <= vy <= self.btn_back[3]:
                 self.go_back()
                 return
@@ -404,7 +404,7 @@ class ShopView(BaseView):
         self.next_item()
 
     def perform_action(self) -> None:
-        """Thực hiện mua hoặc trang bị skin/trail đang chọn."""
+        """Xử lý buy hoặc equip cho item đang chọn."""
         save_data = self.flappy_window.save_data
 
         if self.current_tab == "skins":
@@ -445,7 +445,7 @@ class ShopView(BaseView):
                     self.update_ui_texts()
 
     def go_back(self) -> None:
-        """Quay về màn hình trước."""
+        """Navigate back về view trước đó."""
         if self.previous_view is not None:
             self.window.show_view(self.previous_view)
             return
@@ -493,37 +493,37 @@ class ShopView(BaseView):
         self.tab_skins_text.draw()
         self.tab_trails_text.draw()
 
-        # Số Coin góc phải
+        # Draw coin count ở top-right
         self.coins_text.draw()
 
-        # Khung Xem Trước (Preview Card)
+        # Preview card panel
         preview_box_cx = SCREEN_WIDTH / 2.0
         preview_box_cy = 300.0
         p_w, p_h = 180.0, 130.0
         arcade.draw_lbwh_rectangle_filled(preview_box_cx - p_w / 2.0, preview_box_cy - p_h / 2.0, p_w, p_h, (20, 30, 45, 230))
         arcade.draw_lbwh_rectangle_outline(preview_box_cx - p_w / 2.0, preview_box_cy - p_h / 2.0, p_w, p_h, (80, 140, 200, 255), 2)
 
-        # Nút chuyển trái [<] và phải [>]
+        # Draw Prev [<] và Next [>] buttons
         arcade.draw_lrbt_rectangle_filled(self.btn_prev[0], self.btn_prev[1], self.btn_prev[2], self.btn_prev[3], (40, 60, 90, 240))
         self.prev_btn_text.draw()
 
         arcade.draw_lrbt_rectangle_filled(self.btn_next[0], self.btn_next[1], self.btn_next[2], self.btn_next[3], (40, 60, 90, 240))
         self.next_btn_text.draw()
 
-        # Vẽ Trail Emitter xem trước hiệu ứng (phía sau chim)
+        # Draw preview trail particles (behind bird)
         if self.trail_emitter.is_active:
             self.trail_emitter.draw()
 
-        # Vẽ Sprite chim xem trước bằng SpriteList
+        # Draw preview bird sprite
         self.preview_list.draw()
 
-        # Tên Item & Vị trí
+        # Draw item name và index
         self.item_name_text.draw()
 
-        # Mô tả / Điều kiện
+        # Draw item description / unlock condition
         self.item_desc_text.draw()
 
-        # Nút Hành Động (Mua / Trang bị / Đã dùng)
+        # Draw action button (Buy / Equip / Equipped / Locked)
         act_l, act_r, act_b, act_t = self.btn_action
 
         if is_equipped:
@@ -546,7 +546,7 @@ class ShopView(BaseView):
 
         self.action_btn_text.draw()
 
-        # Nút Trở về [ ESC / BACK ]
+        # Draw Back button
         b_l, b_r, b_b, b_t = self.btn_back
         arcade.draw_lrbt_rectangle_filled(b_l, b_r, b_b, b_t, (50, 55, 65, 230))
         arcade.draw_lrbt_rectangle_outline(b_l, b_r, b_b, b_t, (120, 130, 150, 255), 1)

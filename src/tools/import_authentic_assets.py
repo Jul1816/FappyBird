@@ -1,4 +1,4 @@
-"""Công cụ nhập và chuẩn hóa assets retro từ repo tham khảo sang định dạng RGBA (Arcade 3.3.3)."""
+"""Import tool và converter assets retro sang RGBA format (Arcade 3.3.3)."""
 import os
 from pathlib import Path
 from typing import Optional
@@ -14,7 +14,7 @@ UPLOADED_ROBIN_PATH = Path(
 
 
 def convert_and_save(src_path: Path, dst_path: Path) -> None:
-    """Đọc ảnh (kể cả bảng màu Palette 'P'), chuyển sang RGBA và lưu PNG."""
+    """Load image (kể cả Palette 'P'), convert sang RGBA và save PNG."""
     with Image.open(src_path) as img:
         rgba = img.convert("RGBA")
         dst_path.parent.mkdir(parents=True, exist_ok=True)
@@ -22,7 +22,7 @@ def convert_and_save(src_path: Path, dst_path: Path) -> None:
 
 
 def erase_grey_bird_from_message(dst_path: Path) -> None:
-    """Xóa bỏ hoàn toàn icon chim màu xám trong message.png (rows 168..202, cols 68..112)."""
+    """Erase icon chim xám trong message.png (rows 168..202, cols 68..112)."""
     with Image.open(dst_path) as img:
         rgba = img.convert("RGBA")
         draw = ImageDraw.Draw(rgba)
@@ -31,29 +31,29 @@ def erase_grey_bird_from_message(dst_path: Path) -> None:
 
 
 def create_pixel_cyber_bird(base_bird_path: Path, dst_path: Path) -> None:
-    """Tạo skin Cyber Bird pixel art 34x24 dựa trên phôi chim gốc với visor neon cyan."""
+    """Generate skin Cyber Bird pixel art 34x24 từ base bird với cyan neon visor."""
     with Image.open(base_bird_path) as img:
         rgba = img.convert("RGBA")
     
-    # Đổi bảng màu vàng sang tông kim loại bạc/xám
+    # Remap yellow palette sang metallic silver/gray
     data = list(rgba.getdata())
     new_data = []
     for r, g, b, a in data:
         if a == 0:
             new_data.append((0, 0, 0, 0))
-        elif r > 200 and g > 150 and b < 100:  # Thân vàng
+        elif r > 200 and g > 150 and b < 100:  # Yellow body
             gray = int(r * 0.3 + g * 0.59 + b * 0.11)
             new_data.append((gray, min(255, gray + 10), min(255, gray + 25), a))
-        elif r > 200 and g < 100:  # Mỏ cam
-            new_data.append((0, 220, 200, a))  # Mỏ cyan công nghệ
+        elif r > 200 and g < 100:  # Orange beak
+            new_data.append((0, 220, 200, a))  # Cyan cyber beak
         else:
             new_data.append((r, g, b, a))
     
     rgba.putdata(new_data)
     draw = ImageDraw.Draw(rgba)
     
-    # Visor kính công nghệ xanh neon cyan qua vùng mắt
-    # Mắt chim thường ở quanh x=20..28, y=6..14
+    # Cyan neon visor qua eye region
+    # Eye coordinates khoảng x=20..28, y=6..14
     draw.rectangle([18, 8, 27, 12], fill=(0, 255, 210, 240), outline=(0, 180, 150, 255))
     draw.line([12, 10, 17, 10], fill=(0, 255, 210, 255), width=1)
     
@@ -62,17 +62,17 @@ def create_pixel_cyber_bird(base_bird_path: Path, dst_path: Path) -> None:
 
 
 def create_pixel_golden_bird(base_bird_path: Path, dst_path: Path) -> None:
-    """Tạo skin Golden Bird pixel art 34x24 dựa trên phôi chim gốc với vương miện hoàng kim trên đỉnh mào đầu."""
+    """Generate skin Golden Bird 34x24 từ base bird với golden crown trên crown/crest."""
     with Image.open(base_bird_path) as img:
         rgba = img.convert("RGBA")
     
-    # 1. Tăng ánh kim rực rỡ cho thân chim
+    # 1. Enhance golden sheen cho bird body
     data = list(rgba.getdata())
     new_data = []
     for r, g, b, a in data:
         if a == 0:
             new_data.append((0, 0, 0, 0))
-        elif r > 180 and g > 120 and b < 120:  # Thân vàng óng
+        elif r > 180 and g > 120 and b < 120:  # Golden yellow body
             new_data.append((255, 225, 30, a))
         else:
             new_data.append((r, g, b, a))
@@ -80,19 +80,19 @@ def create_pixel_golden_bird(base_bird_path: Path, dst_path: Path) -> None:
     rgba.putdata(new_data)
     draw = ImageDraw.Draw(rgba)
     
-    # 2. Vương miện hoàng kim 3 chóp trên mào đầu (x=13..19, y=0..2)
-    # Hoàn toàn nằm ngoài vùng mắt (x >= 20), bảo toàn 100% kích thước 34x24 và hitbox
+    # 2. 3-point golden crown trên head crest (x=13..19, y=0..2)
+    # Outside eye region (x >= 20), preserve 34x24 dimensions và standard hitbox
     GOLD_LIGHT = (255, 245, 100, 255)
     GOLD_MID = (255, 215, 0, 255)
     GOLD_DARK = (180, 130, 0, 255)
     RUBY = (230, 25, 25, 255)
     
-    # Row 0: 3 đỉnh chóp vàng ánh kim
+    # Row 0: 3 golden crown peaks
     draw.point((13, 0), fill=GOLD_LIGHT)
     draw.point((16, 0), fill=GOLD_LIGHT)
     draw.point((19, 0), fill=GOLD_LIGHT)
     
-    # Row 1: Thân vương miện + ngọc ruby ở tâm
+    # Row 1: Crown band + center ruby gem
     for x in range(13, 20):
         if x in (13, 19):
             draw.point((x, 1), fill=GOLD_DARK)
@@ -101,7 +101,7 @@ def create_pixel_golden_bird(base_bird_path: Path, dst_path: Path) -> None:
         else:
             draw.point((x, 1), fill=GOLD_MID)
             
-    # Row 2: Đai đế vương miện viền đậm ôm sát mào đầu
+    # Row 2: Dark border base band
     for x in range(13, 19):
         draw.point((x, 2), fill=GOLD_DARK)
     
@@ -113,7 +113,7 @@ def import_all_assets(
     ref_dir: Path = REF_SPRITES_DIR,
     uploaded_robin: Optional[Path] = UPLOADED_ROBIN_PATH,
 ) -> None:
-    """Nhập toàn bộ sprites và skins chuẩn."""
+    """Import toàn bộ sprites và skins."""
     sprites_dst = ASSETS_DIR / "sprites"
     digits_dst = sprites_dst / "digits"
     skins_dst = ASSETS_DIR / "skins"
@@ -122,7 +122,7 @@ def import_all_assets(
     digits_dst.mkdir(parents=True, exist_ok=True)
     skins_dst.mkdir(parents=True, exist_ok=True)
 
-    # 1. Môi trường & UI Banners
+    # 1. Environment & UI banners
     env_sprites = [
         "background-day.png",
         "background-night.png",
@@ -140,13 +140,13 @@ def import_all_assets(
             if name == "message.png":
                 erase_grey_bird_from_message(dst)
 
-    # 2. Chữ số retro 0-9
+    # 2. Retro digit sprites 0-9
     for i in range(10):
         src = ref_dir / f"{i}.png"
         if src.exists():
             convert_and_save(src, digits_dst / f"{i}.png")
 
-    # 3. Skins cơ bản (Lấy midflap tĩnh 34x24 px)
+    # 3. Basic skins (midflap 34x24 px)
     skin_mappings = {
         "classic.png": ref_dir / "yellowbird-midflap.png",
         "blue_bird.png": ref_dir / "bluebird-midflap.png",
@@ -156,13 +156,13 @@ def import_all_assets(
         if src.exists():
             convert_and_save(src, skins_dst / dst_name)
 
-    # 4. Skins tinh chỉnh nâng cao
+    # 4. Enhanced procedural skins
     classic_path = skins_dst / "classic.png"
     if classic_path.exists():
         create_pixel_cyber_bird(classic_path, skins_dst / "cyber_bird.png")
         create_pixel_golden_bird(classic_path, skins_dst / "golden_bird.png")
 
-    # 5. Custom Skin Robin Thiên Thần (Bảo toàn 100% độ phân giải 1023x512)
+    # 5. Custom Skin Robin (preserve full resolution 1023x512)
     if uploaded_robin and uploaded_robin.exists():
         convert_and_save(uploaded_robin, skins_dst / "custom_robin.png")
     

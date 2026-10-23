@@ -1,4 +1,4 @@
-"""Thực thể Ống nước (Pipe) và Quản lý cặp ống (PipeManager)."""
+"""Pipe entity và PipeManager quản lý các cặp pipe."""
 import random
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,7 +24,7 @@ class Pipe(arcade.Sprite):
         super().__init__(path_or_texture=texture_path)
         self.is_upper = is_upper
         if is_upper:
-            # Ống trên chúc đầu xuống
+            # Pipe trên xoay 180 độ
             self.angle = 180.0
         else:
             self.angle = 0.0
@@ -51,15 +51,15 @@ class PipeManager:
         self.pairs: list[PipePair] = []
 
     def can_spawn(self) -> bool:
-        """Kiểm tra xem ống gần nhất đã đi đủ xa mép phải để sinh ống mới chưa."""
+        """Check khoảng cách pipe gần nhất đã đủ điều kiện spawn pipe mới chưa."""
         if not self.pairs:
             return True
         last_pipe = self.pairs[-1]
         return (SCREEN_WIDTH - last_pipe.center_x) >= PIPE_HORIZONTAL_SPACING
 
     def spawn(self, gap_size: float) -> PipePair:
-        """Sinh một cặp ống mới tại mép phải màn hình với khoảng hở gap_size."""
-        # Biên an toàn cho khoảng hở giữa sàn và trần
+        """Spawn cặp pipe mới tại mép phải màn hình với gap_size."""
+        # Clamp an toàn cho gap_y giữa floor và trần màn hình
         min_gap_y = FLOOR_HEIGHT + 30.0 + gap_size / 2.0
         max_gap_y = SCREEN_HEIGHT - 30.0 - gap_size / 2.0
         gap_y = random.uniform(min_gap_y, max_gap_y)
@@ -81,12 +81,12 @@ class PipeManager:
         return pair
 
     def update(self, dt: float, world_speed: float) -> None:
-        """Di chuyển toàn bộ ống và dọn dẹp các ống đã ra khỏi màn hình."""
+        """Update di chuyển pipe và cleanup các pipe đã ra khỏi viewport."""
         dx = world_speed * dt
         for pipe in self.sprite_list:
             pipe.center_x -= dx
 
-        # Dọn dẹp ống trôi qua mép trái
+        # Cleanup các pipe pair đã vượt qua mép trái
         surviving_pairs: list[PipePair] = []
         for pair in self.pairs:
             if pair.upper.right < 0:
@@ -97,7 +97,7 @@ class PipeManager:
         self.pairs = surviving_pairs
 
     def check_score(self, bird_x: float) -> int:
-        """Kiểm tra nếu chim đã bay qua ống chưa tính điểm."""
+        """Check score khi bird vượt qua pipe pair chưa ghi điểm."""
         points = 0
         for pair in self.pairs:
             if not pair.scored and bird_x >= pair.center_x:
@@ -106,6 +106,6 @@ class PipeManager:
         return points
 
     def reset(self) -> None:
-        """Xóa toàn bộ ống."""
+        """Clear toàn bộ pipe trong sprite list và pair list."""
         self.sprite_list.clear()
         self.pairs.clear()
