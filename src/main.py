@@ -1,4 +1,4 @@
-"""Main entry point cho Flappy Bird (Arcade 3.3.3)."""
+
 from typing import Optional
 
 import pyglet
@@ -44,31 +44,30 @@ class FlappyWindow(arcade.Window):
             height=SCREEN_HEIGHT,
             title="Flappy Bird",
             resizable=True,
-            antialiasing=False,  # Pixel art không antialias mờ viền
+            antialiasing=False,  
             visible=visible,
         )
 
-        # Set Nearest-Neighbor filter cho context default_atlas
+        
         if hasattr(self.ctx, "default_atlas") and self.ctx.default_atlas:
             self.ctx.default_atlas.texture.filter = (gl.GL_NEAREST, gl.GL_NEAREST)
 
-        # Storage, audio và gameplay services
+        
         self.storage = storage or StorageService()
         self.save_data: SaveData = self.storage.load()
         self.audio = AudioService()
         self.skin_manager = SkinManager()
         self.trail_manager = TrailManager()
 
-        # Cache texture của equipped skin
+        
         self.current_skin_texture: Optional[arcade.Texture] = None
         self.reload_skin_texture()
 
-        # Debug Mode flags
+        
         self.debug_hitbox: bool = False
         self.god_mode: bool = False
 
-    def reload_skin_texture(self) -> None:
-        """Reload texture của equipped skin hiện tại."""
+    def reload_skin_texture(self) -> None:    
         equipped_id = self.save_data.equipped_skin
         skin_obj = self.skin_manager.get_skin(equipped_id) or self.skin_manager.skins[0]
         try:
@@ -77,7 +76,6 @@ class FlappyWindow(arcade.Window):
             self.current_skin_texture = arcade.load_texture(ASSETS_DIR / "skins" / "yellow.png")
 
     def save_progress(self) -> None:
-        """Persist save data hiện tại vào save_data.json."""
         self.storage.save(self.save_data)
 
 

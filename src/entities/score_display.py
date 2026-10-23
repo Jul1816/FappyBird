@@ -1,4 +1,4 @@
-"""ScoreDisplay render điểm số retro bằng sprite digits 0-9 căn giữa màn hình."""
+
 from pathlib import Path
 from typing import Optional
 
@@ -8,7 +8,7 @@ from ..constants import ASSETS_DIR, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 class ScoreDisplay:
-    """ScoreDisplay quản lý render điểm số retro bằng sprite digits 0-9 căn giữa."""
+    
 
     def __init__(self, digits_dir: Optional[Path] = None, center_y: float = SCREEN_HEIGHT - 60.0) -> None:
         self.digits_dir = digits_dir or (ASSETS_DIR / "sprites" / "digits")
@@ -21,14 +21,13 @@ class ScoreDisplay:
         self.set_score(0)
 
     def load_textures(self) -> None:
-        """Cache sẵn texture cho các digit sprite 0-9."""
+        
         for i in range(10):
             p = self.digits_dir / f"{i}.png"
             if p.exists():
                 self.digit_textures[i] = arcade.load_texture(p)
 
-    def set_score(self, score: int) -> None:
-        """Set score và tự động căn giữa bounding box của digit sprites."""
+    def set_score(self, score: int) -> None:      
         score = max(0, score)
         if score == self.current_score:
             return
@@ -52,5 +51,4 @@ class ScoreDisplay:
             current_x += t.width
 
     def draw(self) -> None:
-        """Draw chuỗi sprite digit score."""
         self.sprites.draw()

@@ -1,4 +1,4 @@
-"""GameOverView: Render scorecard, coins earned, Replay và Shop buttons."""
+
 import arcade
 
 from ..constants import (
@@ -26,15 +26,13 @@ class GameOverView(BaseView):
         self.bg_list.append(self.background)
         self.bg_list.append(self.floor)
 
-        # Hitbox bounds cho Replay button
         self.btn_replay = (
-            SCREEN_WIDTH / 2.0 - 80.0,  # left
-            SCREEN_WIDTH / 2.0 + 80.0,  # right
-            135.0,                       # bottom
-            170.0,                       # top
+            SCREEN_WIDTH / 2.0 - 80.0,  
+            SCREEN_WIDTH / 2.0 + 80.0,  
+            135.0,                       
+            170.0,                       
         )
 
-        # Hitbox bounds cho Shop button
         self.btn_shop = (
             SCREEN_WIDTH / 2.0 - 80.0,
             SCREEN_WIDTH / 2.0 + 80.0,
@@ -47,14 +45,14 @@ class GameOverView(BaseView):
         r_bot, r_top = self.btn_replay[2], self.btn_replay[3]
         s_bot, s_top = self.btn_shop[2], self.btn_shop[3]
 
-        # Retro sprite header Game Over
+        #"GameOver"
         self.gameover_sprite = arcade.Sprite(ASSETS_DIR / "sprites" / "gameover.png")
         self.gameover_sprite.center_x = SCREEN_WIDTH / 2.0
         self.gameover_sprite.center_y = SCREEN_HEIGHT - 110.0
         self.gameover_list = arcade.SpriteList()
         self.gameover_list.append(self.gameover_sprite)
 
-        # Khởi tạo arcade.Text UI elements (font_size=6 cho pixel art typography)
+        #khởi tạo các đối tượng
         self.game_over_text = arcade.Text(
             "GAME OVER",
             SCREEN_WIDTH / 2.0,
@@ -148,19 +146,19 @@ class GameOverView(BaseView):
         if button == arcade.MOUSE_BUTTON_LEFT:
             vx, vy = self.unproject_mouse(x, y)
 
-            # Replay button click handler
+           
             r_left, r_right, r_bot, r_top = self.btn_replay
             if r_left <= vx <= r_right and r_bot <= vy <= r_top:
                 self.restart_game()
                 return
 
-            # Shop button click handler
+            
             s_left, s_right, s_bot, s_top = self.btn_shop
             if s_left <= vx <= s_right and s_bot <= vy <= s_top:
                 self.open_shop()
                 return
 
-            # Default click outside to replay
+           
             self.restart_game()
 
     def restart_game(self) -> None:
@@ -178,10 +176,10 @@ class GameOverView(BaseView):
 
         self.bg_list.draw()
 
-        # Draw Game Over sprite header
+        
         self.gameover_list.draw()
 
-        # Scorecard UI panel
+        #hộp bảng điểm
         card_cx = SCREEN_WIDTH / 2.0
         card_cy = SCREEN_HEIGHT - 210.0
         card_w = 210.0
@@ -190,19 +188,19 @@ class GameOverView(BaseView):
         arcade.draw_lbwh_rectangle_filled(card_cx - card_w / 2.0, card_cy - card_h / 2.0, card_w, card_h, (222, 216, 149, 250))
         arcade.draw_lbwh_rectangle_outline(card_cx - card_w / 2.0, card_cy - card_h / 2.0, card_w, card_h, (180, 150, 70, 255), 3)
 
-        # Draw score details
+        
         self.score_text.draw()
         self.best_text.draw()
         self.coins_earned_text.draw()
         self.total_coins_text.draw()
 
-        # Draw Replay button
+        
         r_left, r_right, r_bot, r_top = self.btn_replay
         arcade.draw_lrbt_rectangle_filled(r_left, r_right, r_bot, r_top, (40, 160, 70, 240))
         arcade.draw_lrbt_rectangle_outline(r_left, r_right, r_bot, r_top, (100, 220, 120, 255), 2)
         self.replay_btn_text.draw()
 
-        # Draw Shop button
+        
         s_left, s_right, s_bot, s_top = self.btn_shop
         arcade.draw_lrbt_rectangle_filled(s_left, s_right, s_bot, s_top, (35, 75, 120, 240))
         arcade.draw_lrbt_rectangle_outline(s_left, s_right, s_bot, s_top, (100, 180, 255, 255), 2)

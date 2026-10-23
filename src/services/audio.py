@@ -1,4 +1,3 @@
-"""AudioService quản lý và play SFX."""
 import logging
 from pathlib import Path
 from typing import Optional
@@ -30,7 +29,6 @@ class AudioService:
                 self.sounds[name] = None
 
     def play(self, name: str) -> None:
-        """Play SFX theo sound name."""
         sound = self.sounds.get(name)
         if sound:
             try:
